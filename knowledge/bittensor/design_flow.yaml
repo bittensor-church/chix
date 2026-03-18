@@ -1,0 +1,291 @@
+# Interactive Interview Flow for Subnet Design
+# Agent uses this to guide conversation — NOT to run silently
+
+mode: interactive_interview
+depth: adaptive  # probe deeper on vague/weak answers, move faster on clear ones
+principle: "Understand before building. Challenge before accepting. Validate before implementing."
+
+# ============================================================================
+# PHASE 1: EXPLORATION (open-ended)
+# Goal: understand what the user wants to build and why
+# ============================================================================
+phase_1_exploration:
+  entry: "What's the subnet idea?"
+  style:
+    - one_question_at_a_time
+    - short_questions_short_answers
+    - suggest_when_you_can  # if you can infer the answer, propose it and ask for confirmation
+    - skip_obvious           # if the user already answered something, don't re-ask
+    - teach_as_you_go        # briefly explain bittensor concepts as they become relevant
+
+  questions:
+    idea_essence:
+      ask: "What's the subnet idea?"
+      listen_for: [commodity_type, value_proposition, end_users]
+      if_vague: "What specific output would a miner produce?"
+
+    miner_value:
+      # Often answerable from the idea description — suggest instead of asking
+      agent_behavior: |
+        Map the user's description to the closest commodity type from incentive.primitives.yaml.
+        SUGGEST it: "In bittensor terms, that's a [commodity] — miners would [action]. Right?"
+        Briefly explain what a 'commodity type' means in this context.
+      only_ask_if: "commodity type is genuinely ambiguous from the description"
+
+    existing_landscape:
+      # Never ask — always do this proactively
+      agent_behavior: |
+        Check INDEX.yaml → example_subnet_index for domain matches.
+        If found: "FYI, SN{X} ({name}) does something related — [one sentence]. Worth knowing about."
+        Don't ask "are you aware" — just surface it.
+        Also search the web for the user's domain — existing projects, APIs, datasets,
+        benchmarks, or standards that could inform the design.
+
+    measurement:
+      ask: "One sentence: 'This subnet measures ___'?"
+      constraint: "No 'and'. One thing."
+      teach: |
+        Briefly explain why single-measurement matters:
+        "In bittensor, a subnet works best when it measures one thing clearly —
+        that's what drives the scoring and incentive logic."
+      iterate_until: "Clear, singular measurement identified"
+
+  adaptive_rule: |
+    If the user's initial description already covers commodity type and measurement clearly,
+    don't re-ask — confirm: "So miners provide [X], and you're measuring [Y]. Got it."
+    Only probe where answers are genuinely unclear.
+
+  phase_exit:
+    agent_must_have:
+      - clear_understanding_of_what_subnet_does
+      - commodity_type_identified
+      - measurement_sentence_drafted
+      - relevant_example_subnets_surfaced
+    agent_action: |
+      Brief summary: "So: [description]. Miners provide [commodity]. Measuring [measurement].
+      [Similar to SN{X} but different because {reason}.]
+      Sound right?"
+
+# ============================================================================
+# PHASE 2: CONSTRAINT VALIDATION (adversarial)
+# Goal: test the idea against bittensor's hard constraints
+# Tone: constructive challenge — surface problems early, don't block the user
+# ============================================================================
+phase_2_constraints:
+  load_kb:
+    - trust.assumptions.yaml
+    - sybil.realities.yaml
+    - validator.rules.yaml
+
+  style: |
+    Don't grill the user. Present constraints as "here's how bittensor works" education.
+    When you spot a problem, explain the concern AND suggest alternatives.
+    If a constraint clearly passes from context, state it and move on — don't ask.
+
+  challenges:
+    ground_truth:
+      # Often inferable — suggest the answer if you can
+      agent_behavior: |
+        Search the web for real verification sources in the user's domain — public APIs,
+        datasets, oracles, benchmarks. Suggest concrete options, not abstract categories.
+        If the ground truth source is obvious (e.g., public API, external data):
+          "Your ground truth comes from [source] — that's solid, validators can't manipulate it. Good."
+        If ambiguous or validator-controlled, explain why it's a problem and suggest options:
+          "Quick bittensor reality: validators aren't trusted individually. If they hold the answer key,
+          they'll share it with their own miners. Options:
+          1. [external source suggestion — name an actual API/dataset]
+          2. [adversarial pattern suggestion]
+          3. [delayed verification suggestion]
+          Which fits best?"
+      cite: "trust.assumptions.yaml"
+
+    sybil:
+      always_cover: true  # but present as education, not interrogation
+      agent_behavior: |
+        Present as context, not a quiz:
+        "One thing to know: in bittensor, anyone can create unlimited identities (coldkeys).
+        So sybil protection comes from mechanism design, not identity checks.
+        The key principle: owning 10 slots shouldn't be 10x more profitable than 1 good miner."
+        Then assess: "In your design, [specific analysis of whether multi-registration helps].
+        [If problem: suggest fix. If fine: say so.]"
+      cite: "sybil.realities.yaml"
+
+    compute:
+      always_cover: true
+      agent_behavior: |
+        If obviously correct (miners do heavy work): confirm and explain why it matters.
+          "Miners handle the heavy compute, validators just check — that's the right split.
+          Keeps validator costs low so more people can validate."
+        If wrong (validators do heavy work): explain the problem and suggest restructuring.
+          "That puts expensive compute on validators, which causes centralization —
+          only well-funded entities can run a validator. Can we flip it so miners host
+          [specific suggestion] and validators just [lightweight check]?"
+      cite: "subnet.invariants.yaml → compute_distribution"
+
+    communication:
+      trigger: "user mentions axon, dendrite, or synapse"
+      agent_behavior: |
+        "Heads up: axon/dendrite/synapse are deprecated in bittensor.
+        New subnets use plain HTTP APIs with Epistula signing for authentication.
+        It's simpler and more flexible."
+
+  adaptive_rule: |
+    If a constraint clearly passes from context, don't ask — confirm and move on.
+    Only ask questions where user input is genuinely needed to resolve ambiguity.
+    Always suggest options when asking (2-3 concrete alternatives).
+
+  phase_exit:
+    all_must_pass:
+      - ground_truth_not_validator_controlled
+      - no_secret_eval_sets
+      - no_similarity_detection_reliance
+      - compute_costs_on_miners
+      - sybil_resistance_understood
+    on_violation:
+      action: "Explain the concern, suggest 2-3 concrete alternatives, let user pick"
+      do_not: "Reject the idea — help them fix it"
+
+# ============================================================================
+# PHASE 3: PATTERN MATCHING (collaborative)
+# Goal: select the right mechanism pattern together
+# ============================================================================
+phase_3_pattern:
+  commodity_to_pattern:
+    compute:
+      fungible: "→ compute_auction pattern"
+      always_on: "→ capacity_market pattern"
+    data:
+      unique_datasets: "→ data_indexing pattern"
+    predictions:
+      future_events: "→ prediction_market pattern"
+      time_series: "→ time_series_forecasting pattern"
+    external:
+      third_party_activity: "→ external_activity_verification pattern"
+    detection_generation:
+      arms_race_beneficial: "→ adversarial_red_blue pattern"
+    software:
+      agents_or_solvers: "→ container_execution pattern"
+
+  agent_action: |
+    Based on phases 1-2, identify the best-fit pattern(s).
+    If one pattern is clearly right, recommend it with confidence — don't manufacture alternatives.
+    If genuinely ambiguous, present 2 with tradeoffs.
+    Always cite an example subnet and briefly explain how the pattern works.
+
+  present_as: |
+    If clear fit:
+      "This maps to the [pattern] pattern — it's how [example subnet] works.
+      [1-2 sentence explanation of the pattern]. [Main tradeoff].
+      Make sense for your use case?"
+    If ambiguous:
+      "Two patterns could work here:
+      1. [pattern_a] (like [example]) — [why, tradeoff]
+      2. [pattern_b] (like [example]) — [why, tradeoff]
+      Which fits better?"
+
+  integration_check:
+    if_needs_storage: "Surface hippius.integration.yaml"
+    if_needs_llm_inference: "Surface chutes.integration.yaml"
+    if_needs_containers: "Surface basilica.containers.yaml"
+    if_needs_social_data: "Surface dataverse.integration.yaml"
+    also: |
+      Search the web for domain-specific tools, APIs, or services that could serve as
+      integrations or data sources. The KB covers bittensor-native integrations but
+      the user's domain may have external resources worth incorporating.
+
+  adaptive_rule: |
+    If the commodity type maps cleanly to exactly one pattern, present it with confidence
+    and ask for confirmation rather than manufacturing alternatives.
+    If ambiguous or hybrid, present 2 candidates with tradeoffs and let user decide.
+
+  phase_exit:
+    requires:
+      - pattern_selected_and_agreed
+      - user_understands_tradeoffs
+      - relevant_integrations_identified
+
+# ============================================================================
+# DESIGN GATE — HARD CHECKPOINT
+# ALL conditions must be met before ANY implementation
+# Agent CANNOT skip. User CANNOT bypass by asking.
+# ============================================================================
+design_gate:
+  type: HARD
+  description: "No code, no technical details, no validator.py until every item passes"
+
+  checklist:
+    - measurement: "One-sentence 'what am I measuring' — confirmed by user"
+    - commodity: "Commodity type mapped to bittensor model"
+    - ground_truth: "Source identified, not validator-controlled"
+    - trust_model: "No secret sets, no similarity reliance"
+    - compute: "Heavy work on miners, not validators"
+    - sybil: "UID pressure understood, no identity reliance"
+    - pattern: "Mechanism pattern selected and agreed"
+    - integrations: "Required cross-subnet integrations identified"
+
+  gate_action: |
+    Present the full design summary:
+    "Here's the complete design before we write any code:
+    - Measuring: {measurement}
+    - Commodity: {commodity}
+    - Pattern: {pattern} (like {example_subnet})
+    - Ground truth: {source}
+    - Miners do: {miner_work}
+    - Validators do: {validator_work}
+    - Integrations: {list}
+
+    Ready to implement, or want to revise anything?"
+
+  on_pass: "Proceed to phase 4 (implementation)"
+  on_fail: "Return to the specific phase that has unresolved issues"
+
+# ============================================================================
+# PHASE 4: IMPLEMENTATION
+# Only reached after design gate passes
+# ============================================================================
+phase_4_implementation:
+  file: "validator.py"
+  contains:
+    - configuration
+    - miner_interface_spec
+    - scoring_logic
+    - weight_setting
+    - main_loop
+  excludes:
+    - miner_code
+    - reference_implementations
+
+validation_checklist:
+  architecture:
+    - single_file_validator_py: required
+    - no_miner_code: required
+    - open_source_preference: required
+
+  trust:
+    - no_secret_eval_sets: required
+    - ground_truth_not_validator_controlled: required
+    - no_similarity_detection_reliance: required
+
+  compute:
+    - costs_on_miners: required
+    - validators_make_api_calls: required
+
+  sybil:
+    - no_coldkey_dedup_for_sybil: required
+    - understand_uid_pressure: required
+
+output_format:
+  required_sections:
+    docstring:
+      - what_measuring
+      - miner_endpoints
+      - request_format
+      - response_format
+      - scoring_criteria
+
+    code:
+      - configuration_constants
+      - miner_interface_definitions
+      - scoring_functions
+      - weight_normalization
+      - main_validation_loop
