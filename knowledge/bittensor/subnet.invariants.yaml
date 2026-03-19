@@ -36,6 +36,7 @@ communication:
     status: DEPRECATED
     rule: "NEVER use for new development"
     replacement: "HTTP APIs with Epistula signing"
+    realized_by: "nexus HTTP communicator (axon/dendrite not supported)"
     rationale:
       - proprietary_limits_flexibility
       - poor_production_performance
@@ -56,6 +57,7 @@ communication:
 chain_commitment_rate_limit:
   rule: "Commitments limited to 1 per 100 blocks (~20 minutes)"
   implication: "Commit STORAGE LOCATION, not individual data items"
+  realized_by: "pylon set_commitment (background task with retry)"
   
   correct_pattern:
     description: "Commit bucket URL once, validators pull from bucket"

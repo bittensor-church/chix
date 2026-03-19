@@ -1,0 +1,111 @@
+# Nexus Capabilities — bittensor requirements → nexus solutions
+
+# ============================================================================
+# VALIDATOR LOOP
+# bittensor ref: validator.contract.yaml → core_loop
+# ============================================================================
+
+validator_loop:
+  bittensor_requirement: "sync → query → score → normalize → submit → wait → repeat"
+  nexus_solution: actor-based runtime with chain-aware timing
+  handled:
+    - continuous processing (no manual loop)
+    - thread-per-actor concurrency
+    - central event bus for message routing
+    - block tracking via pylon polling
+    - epoch boundary detection
+    - automatic lifecycle (start → run → stop)
+  not_handled:
+    - sleep/timing tuning (driven by chain blocks)
+
+# ============================================================================
+# MINER COMMUNICATION
+# bittensor ref: subnet.invariants.yaml → communication
+# ============================================================================
+
+miner_communication:
+  bittensor_requirement: "HTTP REST, not Axon/Dendrite, with timeouts"
+  nexus_solution: async HTTP communicator
+  handled:
+    - HTTP POST to miner endpoints
+    - endpoint discovery from pylon metagraph
+    - configurable send timeout
+    - configurable total processing deadline
+    - callback-based response collection
+    - pending request tracking
+    - timeout detection and sweeping
+    - structured success/failure output
+  not_handled:
+    - epistula header signing (not yet built in)
+
+# ============================================================================
+# METAGRAPH ACCESS
+# bittensor ref: bittensor.core.yaml → metagraph
+# ============================================================================
+
+metagraph_access:
+  bittensor_requirement: "metagraph sync → neuron data access"
+  nexus_solution: neuron router via pylon cached metagraph
+  handled:
+    - fetch neuron list from pylon (cached, fast)
+    - filter by role (miners_only, validators_only, custom)
+    - pluggable selection strategy (round-robin built in)
+    - neuron IP/port extraction for HTTP requests
+  source: pylon.open_access.get_recent_neurons()
+
+# ============================================================================
+# WEIGHT SETTING
+# bittensor ref: validator.contract.yaml → weight_setting
+# ============================================================================
+
+weight_setting:
+  bittensor_requirement: "normalize → submit → respect rate limits"
+  nexus_solution: epoch-triggered weight setter via pylon
+  handled:
+    - epoch boundary detection (from block stream)
+    - accumulated result access for scoring
+    - submission to pylon (handles normalization, commit-reveal, retries)
+  developer_provides: "weighing function: task_results → {hotkey: weight}"
+
+# ============================================================================
+# TASK PIPELINE
+# nexus-specific, no direct bittensor equivalent
+# ============================================================================
+
+task_pipeline:
+  purpose: "pre-built flow for the common validator pattern"
+  stages:
+    - retry (exponential backoff)
+    - payload_creation (developer-provided transform)
+    - neuron_routing (miner selection)
+    - timestamping (chain-synced timing)
+    - http_communication (async, with timeout)
+    - result_conversion (developer-provided transform)
+    - result_storage (for weight calculation)
+    - output_splitting (result + raw output branches)
+    - error_muxing (unified error stream)
+
+# ============================================================================
+# ADDITIONAL CAPABILITIES (beyond bittensor requirements)
+# ============================================================================
+
+context_tracking:
+  - per-message processing history
+  - delta-based state serialization
+  - scatter-gather (one input → parallel tasks → merge)
+  - per-context user data
+  - full audit trail
+  - state recovery from log replay
+
+flow_composition:
+  - declarative actor wiring
+  - type-safe connections (basedpyright catches mismatches)
+  - branching (success/error paths)
+  - merging, fan-out
+  - composable sub-flows
+
+concurrency:
+  model: thread-based actors with message-passing
+  no_async: true
+  no_shared_state: true
+  developer_manages_threads: false

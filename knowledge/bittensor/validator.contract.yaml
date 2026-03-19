@@ -50,6 +50,7 @@ design_philosophy:
         - shared_synapse_definitions
 
 core_loop:
+  realized_by: nexus_framework
   steps:
     1_sync: "metagraph.sync()"
     2_sample: "query miners or check external data"
@@ -57,17 +58,28 @@ core_loop:
     4_aggregate: "combine into final weights"
     5_set_weights: "submit to chain"
     6_wait: "sleep until next cycle"
+  nexus_mapping:
+    1_sync: "NeuronRouter via pylon cached metagraph"
+    2_sample: "NexusTask pipeline (routing → HTTP communicator → response)"
+    3_score: "developer-provided weighing_function"
+    4_aggregate: "developer-provided weighing_function"
+    5_set_weights: "WeightSetter actor → pylon.identity.put_weights()"
+    6_wait: "BlockBeat + EpochBeat drive timing (no manual sleep)"
 
 communication:
   deprecated:
     - axon
     - dendrite
     - synapse
-  
+
   recommended:
     protocol: "HTTP/REST"
     signing: epistula
     discovery: "miners commit endpoints to chain"
+    realized_by:
+      http: "nexus AsyncHttpNeuronCommunicator"
+      discovery: "nexus NeuronRouter via pylon metagraph"
+      epistula: "not yet in nexus — manual or future addition"
   
   epistula_headers:
     - "X-Epistula-Timestamp": "nonce"
@@ -95,6 +107,7 @@ scoring_patterns:
     age_adjustment: "new miners: higher alpha"
 
 weight_setting:
+  realized_by: "nexus WeightSetter → pylon (normalization, commit-reveal, retries)"
   normalization: "weights must sum to 1"
   conversion:
     softmax:
@@ -109,6 +122,7 @@ weight_setting:
   commit_reveal:
     when_to_use: "ONLY if weight copying proven problem"
     warning: "mature subnet problem, not default"
+    realized_by: "pylon auto-detects commit-reveal from hyperparams, handles full flow"
     process:
       1: "commit(hash(weights))"
       2: "wait commit_reveal_period"

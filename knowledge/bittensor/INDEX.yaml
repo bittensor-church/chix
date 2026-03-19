@@ -39,6 +39,7 @@ files_by_category:
     chutes.integration.yaml: "SN64 LLM inference API"
     basilica.containers.yaml: "container execution for agent subnets"
     hippius.integration.yaml: "SN75 decentralized storage, S3/IPFS, provenance"
+    desearch.integration.yaml: "SN22 real-time search, Twitter/Reddit/web data"
     dataverse.integration.yaml: "SN13 social data API, X and Reddit scraping"
     sdk.quick_reference.yaml: "Python SDK patterns, token trading"
     btcli.reference.yaml: "CLI command reference"
@@ -46,7 +47,7 @@ files_by_category:
     ops.principles.yaml: "deployment, monitoring, operations"
 
   guidance:
-    design_flow.yaml: "interactive interview protocol for subnet design (4 phases + hard gate)"
+    design_flow.yaml: "decision tree for mechanism selection"
     load_order.yaml: "context loading sequences by task"
 
   example_subnets:
@@ -62,81 +63,13 @@ files_by_category:
     example.hippius_sn75.yaml: "Hippius - decentralized storage and compute"
     example.swarm_sn124.yaml: "Swarm - drone autopilot policy competition"
 
-example_subnet_index:
-  by_pattern:
-    adversarial_red_blue: [example.bitmind_sn34.yaml]
-    compute_auction: [example.affine_sn120.yaml]
-    time_series_forecasting: [example.numinous_sn6.yaml, example.zeus_sn18.yaml]
-    container_execution: [example.kinitro_sn26.yaml, example.gradients_sn56.yaml, example.swarm_sn124.yaml]
-    capacity_market: [example.lium_sn51.yaml, example.hippius_sn75.yaml]
-    data_indexing: []
-    prediction_market: []
-    external_activity_verification: []
-  by_domain:
-    ai_ml: [example.affine_sn120.yaml, example.gradients_sn56.yaml, example.404gen_sn17.yaml]
-    science: [example.nova_sn68.yaml, example.zeus_sn18.yaml]
-    infrastructure: [example.lium_sn51.yaml, example.hippius_sn75.yaml]
-    media: [example.bitmind_sn34.yaml, example.404gen_sn17.yaml]
-    finance: [example.numinous_sn6.yaml]
-    robotics: [example.kinitro_sn26.yaml, example.swarm_sn124.yaml]
-
 task_routing:
   designing_new_subnet:
-    mode: interview
-    instruction: "Follow design_flow.yaml interview protocol. Do NOT skip to implementation."
-    phases:
-      exploration:
-        load:
-          - subnet.invariants.yaml
-          - incentive.primitives.yaml
-        purpose: "Understand the idea, identify commodity type, map to bittensor model"
-        agent_action: "Ask what the subnet does, who benefits, what miners provide"
-        kb_surfacing: "Reference example_subnet_index for domain matches"
-
-      constraint_validation:
-        load:
-          - trust.assumptions.yaml
-          - sybil.realities.yaml
-          - validator.rules.yaml
-        purpose: "Test the idea against bittensor's trust model and hard constraints"
-        agent_action: "Challenge ground truth source, sybil assumptions, compute distribution"
-        kb_surfacing: "Quote specific rules that the idea may violate"
-
-      pattern_matching:
-        load:
-          - design_flow.yaml
-        also_load: "{matched_pattern}.yaml"
-        purpose: "Select and discuss mechanism pattern with user"
-        agent_action: "Present 1-2 candidate patterns with tradeoffs, let user decide"
-        kb_surfacing: "Show example subnets using each candidate pattern"
-
-      design_gate:
-        type: HARD
-        requires:
-          - measurement_one_sentence: "Clear single-sentence answer to 'what am I measuring?'"
-          - commodity_type_identified: "Maps to one of: inference, compute, data, predictions, external_work, availability"
-          - ground_truth_source: "Identified and validated (not validator-controlled, not secret)"
-          - trust_check_passed: "No secret eval sets, no similarity reliance, no coldkey sybil"
-          - compute_distribution_correct: "Expensive compute on miners, not validators"
-          - pattern_selected: "User agrees on mechanism pattern"
-          - sybil_considered: "User understands UID pressure, not relying on identity"
-          - integrations_identified: "Required cross-subnet integrations listed"
-        on_fail: "Return to the specific phase that has unresolved issues"
-
-      implementation:
-        load:
-          - "{selected_pattern}.yaml"
-          - validator.contract.yaml
-          - sdk.quick_reference.yaml
-        then: "Generate validator.py following design_flow.yaml output_format"
-
-  implementing_validator:
     load:
       - subnet.invariants.yaml
-      - validator.rules.yaml
-      - validator.contract.yaml
-      - "{selected_pattern}.yaml"
-      - sdk.quick_reference.yaml
+      - design_flow.yaml
+      - incentive.primitives.yaml
+    then: "select pattern from mechanism_patterns based on commodity type"
 
   understanding_attacks:
     load:
@@ -172,10 +105,20 @@ task_routing:
       - provenance_verification
       - large_file_distribution
 
+  desearch_real_time:
+    load:
+      - desearch.integration.yaml
+      - validator.contract.yaml
+    use_when:
+      - real_time_social_signals
+      - live_twitter_reddit_data
+      - agent_context_enrichment
+      - event_verification
+      - sentiment_analysis
+
   dataverse_social_data:
     load:
       - dataverse.integration.yaml
-      - validator.contract.yaml
 
   cli_operations:
     load:
@@ -215,4 +158,4 @@ critical_doctrines:
   - "Commit-reveal weights: mature subnet tool only"
   - "Containers required when miners compete on software"
   - "Provenance via Hippius: timestamp data to prove temporal ordering"
-  - "Social data via Dataverse: X and Reddit scraping for agent reasoning"
+  - "Real-time data via Desearch: live Twitter/Reddit/web for agent reasoning"

@@ -1,0 +1,31 @@
+# Nexus Framework Knowledge Base
+# Production validator framework for Bittensor subnets
+
+depends_on: pylon (bittensor-pylon-client)
+no_bittensor_dependency: true
+pylon_server_required: true
+
+files:
+  nexus.capabilities.yaml: "bittensor requirements → nexus solutions"
+  nexus.model.yaml: "how nexus structures a validator"
+  nexus.boundaries.yaml: "nexus provides vs developer provides"
+
+covers:
+  validator_loop: fully
+  miner_communication: fully
+  metagraph_access: fully
+  weight_setting: fully
+  miner_selection: fully
+  result_persistence: fully
+  chain_timing: fully
+
+planned:
+  epistula_signing: "planned implementation as transparent part of a nexus <-> miner communicator"
+
+does_not_cover:
+  commitment_management: "use pylon directly"
+  scoring_logic: "subnet-specific"
+  task_design: "subnet-specific"
+
+more_info:
+  repo: https://github.com/bittensor-church/nexus-poc

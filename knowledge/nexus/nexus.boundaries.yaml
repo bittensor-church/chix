@@ -1,0 +1,79 @@
+# Nexus Boundaries — framework vs developer
+
+# ============================================================================
+# NEXUS PROVIDES
+# ============================================================================
+
+nexus_provides:
+  infrastructure:
+    - actor runtime with thread management
+    - event bus for message routing
+    - context tracking and persistence
+    - flow DSL for declarative wiring
+    - subnet runtime lifecycle
+
+  bittensor_integration:
+    - block and epoch beat producers
+    - neuron routing with pylon metagraph
+    - weight setter with epoch triggering
+    - pylon client configuration from env vars
+
+  miner_communication:
+    - async HTTP communicator
+    - timeout management
+    - pending request tracking
+    - retry with exponential backoff
+
+  result_management:
+    - task result storage interface
+    - result persistence for weight calculation
+    - output splitting (full result + raw output)
+    - error muxing (unified error stream)
+
+# ============================================================================
+# DEVELOPER PROVIDES
+# ============================================================================
+
+developer_provides:
+  payload_creator:
+    what: "transform input → what the miner receives"
+    example: "generate task parameters, S3 presigned URLs"
+
+  result_converter:
+    what: "transform raw miner response → storable/scorable form"
+    example: "extract scores, validate response format"
+
+  weighing_function:
+    what: "read accumulated results → return hotkey→weight map"
+    this_is: "the subnet's scoring logic"
+    bittensor_ref: "validator.contract.yaml → scoring_patterns"
+
+  input_source:
+    what: "what triggers task processing"
+    options: [REST endpoint, producer actor, external poller]
+
+  neuron_filter:
+    what: "which neurons to consider"
+    default: miners_only
+    custom: "any predicate on neuron data"
+
+  routing_strategy:
+    what: "how to select from filtered neurons"
+    default: round_robin
+    custom: "any selection logic"
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+configuration:
+  mechanism: environment variables
+  no_config_files: true
+
+  required:
+    VALIDATOR_PYLON_SERVICE_ADDRESS: "pylon URL"
+    VALIDATOR_PYLON_OPEN_ACCESS_TOKEN: "read token"
+
+  optional:
+    VALIDATOR_PYLON_IDENTITY_NAME: "for weight setting"
+    VALIDATOR_PYLON_IDENTITY_TOKEN: "for weight setting"

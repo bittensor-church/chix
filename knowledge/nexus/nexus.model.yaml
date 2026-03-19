@@ -1,0 +1,78 @@
+# Nexus Mental Model
+
+# ============================================================================
+# CORE CONCEPTS
+# ============================================================================
+
+concepts:
+  actor:
+    what: "independent processing unit in its own thread"
+    receives: typed messages via queue
+    emits: typed messages via event bus
+    no_direct_calls: true
+
+  node:
+    what: "blueprint for an actor"
+    declares: "inputs (sinks), outputs (sources), configuration"
+    design_time_only: true
+
+  flow:
+    what: "wired graph of nodes"
+    type_safe: true
+    composable: true
+
+  nexus_task:
+    what: "pre-built flow covering common validator pattern"
+    covers: "retry → payload → routing → comms → results"
+    customization: "plug in subnet-specific transforms"
+
+  context:
+    what: "per-message state tracker"
+    carries: [payload, user_data, log_entries]
+    enables: [debugging, recovery, scatter_gather]
+
+# ============================================================================
+# TYPICAL VALIDATOR STRUCTURE
+# ============================================================================
+
+components:
+  block_beat: "polls pylon → emits on new block"
+  epoch_beat: "detects epoch boundaries from block stream"
+  nexus_task: "input → miner → response → result storage"
+  weight_setter: "epoch-triggered, reads results, submits weights"
+
+wiring:
+  block_beat → [nexus_task.timing, epoch_beat]
+  epoch_beat → weight_setter
+  nexus_task → result_store
+  weight_setter ← result_store
+
+# ============================================================================
+# ACTOR PATTERNS (for custom actors)
+# ============================================================================
+
+patterns:
+  transform: "1 in → 1 out + error branch"
+  fork: "1 in → 2 conditional outputs"
+  producer: "no input, generates on schedule"
+  override: one method per pattern
+
+# ============================================================================
+# RUNTIME MODEL
+# ============================================================================
+
+processes:
+  validator:
+    runs: "nexus runtime (actors + event bus)"
+    threading: "1 daemon thread per actor + 1 for event bus"
+    lifecycle: "build → run_loop → request_stop → wait_for_stop"
+
+  pylon:
+    runs: "separate process (Docker)"
+    reachable_via: HTTP
+    handles: "all chain communication"
+
+  miners:
+    location: remote
+    reachable_via: HTTP
+    discovered_from: "metagraph via pylon"

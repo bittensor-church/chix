@@ -1,12 +1,55 @@
 [project]
-name = "chix"
+name = ""
 version = "0.1.0"
-description = "Add your description here"
+description = ""
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "bittensor-nexus-lib",
 ]
 
+[tool.uv]
+exclude-newer = "1 week"
+
 [tool.uv.sources]
 bittensor-nexus-lib = { git = "https://github.com/bittensor-church/nexus-poc.git", subdirectory = "nexus-template" }
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.36.1",
+    "ruff",
+    "pytest",
+    "polyfactory",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "TC005"]
+preview = true
+explicit-preview-rules = true
+extend-select = ["DOC501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["I", "F401"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error::pytest.PytestUnhandledThreadExceptionWarning",
+]
+
+[tool.basedpyright]
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+include = ["validator.py", "tests"]
+verboseOutput = true
+useLibraryCodeForTypes = true
+reportMissingTypeStubs = "warning"
+reportUndefinedVariable = "error"
+reportUnusedImport = "warning"
+reportExplicitAny = "none"
+venvPath = "."
+venv = ".venv"
+extraPaths = [".venv/lib/python3.14/site-packages"]
