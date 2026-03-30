@@ -26,14 +26,19 @@ task_routing:
     requires: [ user_subnet_idea ]
     required_knowledge: [ bittensor ]
     do_not_load: [ nexus, pylon ]
-    reasoning_effort: MAX
+    reasoning:
+      effort: MAX
+      grounding_knowledge: [ bittensor, polkadot, substrate ]
     definition_of_done:
       - "ALL design rules discovered and met"
       - "subnet design approved by user"
       - "subnet design written to a file"
+    after_completion:
+      start_task: implementing_validator
+      automatically: ask_user_proactively
 
   implementing_validator:
-    requires: [ subnet_design_approved_by_user, project_directory_ready_for_development ]
+    requires: [ subnet_design_approved_by_user, uv_sync ]
     required_knowledge: [ bittensor, nexus, pylon ]
     definition_of_done:
       - "project directory ready for development"
