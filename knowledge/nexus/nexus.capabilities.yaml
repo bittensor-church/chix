@@ -1,111 +1,152 @@
-# Nexus Capabilities — bittensor requirements → nexus solutions
+# Nexus Capabilities — problem categories nexus solves
 
 # ============================================================================
-# VALIDATOR LOOP
-# bittensor ref: validator.contract.yaml → core_loop
+# RUNTIME AND LIFECYCLE
 # ============================================================================
 
-validator_loop:
-  bittensor_requirement: "sync → query → score → normalize → submit → wait → repeat"
-  nexus_solution: actor-based runtime with chain-aware timing
-  handled:
-    - continuous processing (no manual loop)
-    - thread-per-actor concurrency
-    - central event bus for message routing
-    - block tracking via pylon polling
-    - epoch boundary detection
-    - automatic lifecycle (start → run → stop)
-  not_handled:
-    - sleep/timing tuning (driven by chain blocks)
+runtime:
+  problem: |
+    A validator has many concurrent responsibilities — chain sync, miner
+    communication, result processing, weight setting, external integrations.
+    Managing these manually leads to tangled state, cascading failures, and
+    code that is hard to reason about.
+  solution: |
+    Actor-based runtime where each responsibility runs as an isolated unit
+    in its own thread. The framework manages startup, shutdown, error
+    isolation, and message routing between actors. Developer writes simple
+    synchronous logic per actor; the runtime handles the rest.
 
 # ============================================================================
 # MINER COMMUNICATION
-# bittensor ref: subnet.invariants.yaml → communication
 # ============================================================================
 
 miner_communication:
-  bittensor_requirement: "HTTP REST, not Axon/Dendrite, with timeouts"
-  nexus_solution: async HTTP communicator
-  handled:
-    - HTTP POST to miner endpoints
-    - endpoint discovery from pylon metagraph
-    - configurable send timeout
-    - configurable total processing deadline
-    - callback-based response collection
-    - pending request tracking
-    - timeout detection and sweeping
-    - structured success/failure output
-  not_handled:
-    - epistula header signing (not yet built in)
+  problem: |
+    Validators must send tasks to remote miners over HTTP, handle timeouts,
+    track pending requests, and collect responses — often asynchronously
+    via callbacks. Miner endpoints change as the metagraph updates.
+  solution: |
+    Pre-built HTTP communicator handling async request/response with callback
+    collection, timeout sweeping, pending request tracking, and structured
+    success/failure output. Endpoint discovery is automatic from the
+    metagraph via pylon.
 
 # ============================================================================
-# METAGRAPH ACCESS
-# bittensor ref: bittensor.core.yaml → metagraph
+# LOCAL EXECUTION
 # ============================================================================
 
-metagraph_access:
-  bittensor_requirement: "metagraph sync → neuron data access"
-  nexus_solution: neuron router via pylon cached metagraph
-  handled:
-    - fetch neuron list from pylon (cached, fast)
-    - filter by role (miners_only, validators_only, custom)
-    - pluggable selection strategy (round-robin built in)
-    - neuron IP/port extraction for HTTP requests
-  source: pylon.open_access.get_recent_neurons()
+local_execution:
+  problem: |
+    Some processing needs to run within the validator itself — local scoring,
+    validation steps, or testing without remote miners.
+  solution: |
+    Embedded executor that runs processing functions in-process using the
+    same interface as remote communication. Useful for local logic and
+    for testing pipelines without live miners.
+
+# ============================================================================
+# CHAIN SYNCHRONIZATION
+# ============================================================================
+
+chain_synchronization:
+  problem: |
+    Validators must track new blocks, detect epoch boundaries, and time
+    their actions to chain events. Polling must be resilient to transient
+    chain failures.
+  solution: |
+    Producer actors that poll pylon for block and epoch changes, emitting
+    typed timing signals into the pipeline. These run independently and
+    drive downstream processing. Resilient to transient pylon failures.
+
+# ============================================================================
+# MINER TASK ROUTING
+# ============================================================================
+
+miner_task_routing:
+  problem: |
+    Validators must select which miners to send tasks to, based on
+    metagraph data. Selection strategies vary by subnet.
+  solution: |
+    Neuron routing with pluggable filtering and selection strategies.
+    Built-in options for common cases. Custom strategies can be provided.
 
 # ============================================================================
 # WEIGHT SETTING
-# bittensor ref: validator.contract.yaml → weight_setting
 # ============================================================================
 
 weight_setting:
-  bittensor_requirement: "normalize → submit → respect rate limits"
-  nexus_solution: epoch-triggered weight setter via pylon
-  handled:
-    - epoch boundary detection (from block stream)
-    - accumulated result access for scoring
-    - submission to pylon (handles normalization, commit-reveal, retries)
-  developer_provides: "weighing function: task_results → {hotkey: weight}"
+  problem: |
+    Validators must calculate and submit weights at epoch boundaries,
+    respecting rate limits and chain timing.
+  solution: |
+    Epoch-triggered weight setting that reads accumulated results and
+    submits through pylon. The subnet provides only the weighing function
+    (accumulated results → weight map).
 
 # ============================================================================
-# TASK PIPELINE
-# nexus-specific, no direct bittensor equivalent
+# RESULT PERSISTENCE
 # ============================================================================
 
-task_pipeline:
-  purpose: "pre-built flow for the common validator pattern"
-  stages:
-    - retry (exponential backoff)
-    - payload_creation (developer-provided transform)
-    - neuron_routing (miner selection)
-    - timestamping (chain-synced timing)
-    - http_communication (async, with timeout)
-    - result_conversion (developer-provided transform)
-    - result_storage (for weight calculation)
-    - output_splitting (result + raw output branches)
-    - error_muxing (unified error stream)
+result_persistence:
+  problem: |
+    Task results must be stored for weight calculation and survive
+    validator restarts. State rehydration after shutdown is a common
+    engineering challenge.
+  solution: |
+    Built-in result storage with pluggable persistence backends.
+    Context tracking records per-message processing history as deltas,
+    enabling state recovery from log replay. The framework handles
+    serialization and rehydration.
 
 # ============================================================================
-# ADDITIONAL CAPABILITIES (beyond bittensor requirements)
+# RETRY AND ERROR HANDLING
+# ============================================================================
+
+retry_and_error_handling:
+  problem: |
+    Miner requests fail. Chain calls time out. Processing steps throw
+    exceptions. Each failure mode needs different handling.
+  solution: |
+    Retry strategies with configurable backoff built into the task
+    pipeline. Errors are routed as typed messages through the pipeline,
+    not thrown as exceptions. Each actor pattern has explicit success
+    and error output paths. The framework provides a typed exception
+    hierarchy for domain-specific error handling.
+
+# ============================================================================
+# HTTP ENTRY POINTS
+# ============================================================================
+
+http_entry_points:
+  problem: |
+    Some validators accept external input via HTTP — user requests,
+    webhook callbacks, API endpoints.
+  solution: |
+    Built-in HTTP server actor that accepts requests, feeds them into
+    the pipeline, collects results, and returns HTTP responses.
+    Declaratively wired like any other actor.
+
+# ============================================================================
+# EXTERNAL INTEGRATIONS
+# ============================================================================
+
+external_integrations:
+  available:
+    - "S3-compatible storage (presigned URLs for miner data exchange)"
+    - "OpenRouter (LLM inference for scoring or validation logic)"
+  planned: |
+    Bittensor-backed services are being integrated as available
+    building blocks. Check the source for the current set.
+
+# ============================================================================
+# CONTEXT TRACKING AND OBSERVABILITY
 # ============================================================================
 
 context_tracking:
-  - per-message processing history
-  - delta-based state serialization
-  - scatter-gather (one input → parallel tasks → merge)
-  - per-context user data
-  - full audit trail
-  - state recovery from log replay
-
-flow_composition:
-  - declarative actor wiring
-  - type-safe connections (basedpyright catches mismatches)
-  - branching (success/error paths)
-  - merging, fan-out
-  - composable sub-flows
-
-concurrency:
-  model: thread-based actors with message-passing
-  no_async: true
-  no_shared_state: true
-  developer_manages_threads: false
+  problem: |
+    Debugging distributed pipelines is hard. Understanding what happened
+    to a specific request across many actors requires structured tracing.
+  solution: |
+    Every message flowing through the pipeline carries a context that
+    records its full processing history as state deltas. Provides
+    audit trails, per-context user data, and state recovery from logs.

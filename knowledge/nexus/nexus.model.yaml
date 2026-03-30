@@ -1,4 +1,4 @@
-# Nexus Mental Model
+# Nexus Mental Model — how nexus structures a validator
 
 # ============================================================================
 # CORE CONCEPTS
@@ -6,73 +6,126 @@
 
 concepts:
   actor:
-    what: "independent processing unit in its own thread"
-    receives: typed messages via queue
-    emits: typed messages via event bus
+    what: "independent processing unit running in its own thread"
+    receives: "messages on its sinks"
+    emits: "messages from its sources"
+    routing: "wiring defines where messages go"
+    key_property: "simple synchronous loop — easy to reason about in isolation"
     no_direct_calls: true
 
   node:
-    what: "blueprint for an actor"
+    what: "blueprint and factory for an actor"
     declares: "inputs (sinks), outputs (sources), configuration"
-    design_time_only: true
+    builds: "the corresponding actor at runtime"
+
+  source_and_sink:
+    source: "a typed output endpoint on a node"
+    sink: "a typed input endpoint on a node"
+    wiring: "a source connects to a sink — messages flow along that wire"
 
   flow:
-    what: "wired graph of nodes"
+    what: "declarative wiring of nodes into a pipeline"
+    defines: "which source connects to which sink"
     type_safe: true
-    composable: true
+    composable: "flows can be nested and combined"
 
-  nexus_task:
-    what: "pre-built flow covering common validator pattern"
-    covers: "retry → payload → routing → comms → results"
-    customization: "plug in subnet-specific transforms"
+  piping:
+    what: "the complete set of source-to-sink connections"
+    topology: |
+      A directed graph of point-to-point connections. There is no shared
+      medium — messages go only where they are wired to go. The graph
+      can be cyclic — feedback loops are a deliberate feature (e.g.,
+      retry strategies feed failures back into the pipeline).
+      Dangling connections are possible.
 
   context:
-    what: "per-message state tracker"
-    carries: [payload, user_data, log_entries]
-    enables: [debugging, recovery, scatter_gather]
+    what: "per-message state tracker that follows a message through the pipeline"
+    carries: "processing history as state deltas, arbitrary user data, audit notes"
+    survives: "restarts — can be recovered from persisted logs"
+    immutable_after: "completion — no further mutations allowed"
+
+  task_pipeline:
+    what: "pre-built composite flow covering the common validator pattern"
+    covers: "retry → payload creation → miner routing → communication → timestamping → result storage"
+    customization: "subnet-specific logic is injected as parameters, not written from scratch"
+
+# ============================================================================
+# HOW TO THINK ABOUT BUILDING A VALIDATOR
+# ============================================================================
+
+building_model:
+  shape: |
+    A validator is a directed graph of actors connected by typed
+    point-to-point wires, all running in parallel. The graph's shape
+    is declared up front and the runtime executes it.
+
+  preference_hierarchy:
+    1_use_existing: "if a building block does what you need, use it"
+    2_compose: "if you can achieve it by wiring multiple existing blocks into a sub-pipeline, do that"
+    3_extend_pattern: "if you need custom logic, extend one of the provided actor patterns"
+    4_custom_node: "fully custom nodes are acceptable but only as a last resort"
+    5_never: "never sidestep the runtime — no raw threads, no direct HTTP, no out-of-band state"
+
+  what_good_code_looks_like: |
+    Mostly declarative pipeline wiring with small nuggets of subnet-specific
+    logic injected as parameters to framework-provided blocks. Short, concise,
+    well-typed, easily reviewable.
+
+# ============================================================================
+# ACTOR PATTERNS
+# ============================================================================
+
+patterns:
+  description: |
+    The framework provides base patterns for common actor shapes —
+    single-input transforms, conditional branching, message producers,
+    terminal consumers, and bidirectional processing. When building
+    custom actors, start from the pattern that best fits your need.
+    Discover the specific patterns from the source — they define what
+    you override and what the framework handles for you.
 
 # ============================================================================
 # TYPICAL VALIDATOR STRUCTURE
 # ============================================================================
 
-components:
-  block_beat: "polls pylon → emits on new block"
-  epoch_beat: "detects epoch boundaries from block stream"
-  nexus_task: "input → miner → response → result storage"
-  weight_setter: "epoch-triggered, reads results, submits weights"
+typical_structure:
+  description: |
+    Most validators share a common shape. The framework provides a
+    high-level entry point that handles most of the wiring automatically.
+    Discover it from the source — it exists specifically to reduce
+    boilerplate. There is also a lower-level builder for more control.
 
-wiring:
-  block_beat → [nexus_task.timing, epoch_beat]
-  epoch_beat → weight_setter
-  nexus_task → result_store
-  weight_setter ← result_store
+  common_components:
+    - "a block clock that tracks chain progress"
+    - "an epoch clock that detects epoch boundaries"
+    - "one or more task pipelines sending work to miners and collecting results"
+    - "a weight setter triggered at epoch boundaries"
+    - "optionally, an HTTP entry point for external input"
 
-# ============================================================================
-# ACTOR PATTERNS (for custom actors)
-# ============================================================================
-
-patterns:
-  transform: "1 in → 1 out + error branch"
-  fork: "1 in → 2 conditional outputs"
-  producer: "no input, generates on schedule"
-  override: one method per pattern
+  data_flow: |
+    Chain clocks drive the pipeline timing. Task pipelines handle the
+    full lifecycle of sending work to miners and storing results. At
+    epoch boundaries, the weight setter reads accumulated results,
+    applies the subnet's scoring logic, and submits weights via pylon.
 
 # ============================================================================
 # RUNTIME MODEL
 # ============================================================================
 
-processes:
-  validator:
-    runs: "nexus runtime (actors + event bus)"
-    threading: "1 daemon thread per actor + 1 for event bus"
-    lifecycle: "build → run_loop → request_stop → wait_for_stop"
+runtime:
+  threading: |
+    One daemon thread per actor, all managed by the framework. Actors
+    never share mutable state — all communication is via point-to-point
+    message wiring.
 
-  pylon:
-    runs: "separate process (Docker)"
-    reachable_via: HTTP
-    handles: "all chain communication"
+  lifecycle: "build graph → start all actors → run until stopped → graceful shutdown"
 
-  miners:
-    location: remote
-    reachable_via: HTTP
-    discovered_from: "metagraph via pylon"
+  error_isolation: |
+    A failure in one actor does not crash others. Errors are routed as
+    typed messages through the pipeline's error paths, not thrown as
+    exceptions that propagate across threads.
+
+  processes:
+    validator: "runs the nexus runtime (actors + message graph)"
+    pylon: "separate process — handles all chain communication via HTTP"
+    miners: "remote — discovered from metagraph, reached via HTTP"

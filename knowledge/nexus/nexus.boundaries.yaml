@@ -1,79 +1,106 @@
-# Nexus Boundaries — framework vs developer
+# Nexus Boundaries — framework vs subnet developer
 
 # ============================================================================
-# NEXUS PROVIDES
+# NEXUS HANDLES (the subnet developer does not need to build these)
 # ============================================================================
 
-nexus_provides:
-  infrastructure:
-    - actor runtime with thread management
-    - event bus for message routing
-    - context tracking and persistence
-    - flow DSL for declarative wiring
-    - subnet runtime lifecycle
+nexus_handles:
+  runtime:
+    - "actor lifecycle — startup, shutdown, error isolation"
+    - "thread management — one thread per actor, all managed by the framework"
+    - "message routing along declared wires"
 
-  bittensor_integration:
-    - block and epoch beat producers
-    - neuron routing with pylon metagraph
-    - weight setter with epoch triggering
-    - pylon client configuration from env vars
+  chain_integration:
+    - "block and epoch tracking via pylon polling"
+    - "weight submission at epoch boundaries via pylon"
+    - "metagraph access and neuron discovery via pylon"
 
   miner_communication:
-    - async HTTP communicator
-    - timeout management
-    - pending request tracking
-    - retry with exponential backoff
+    - "async HTTP request/response with callbacks and timeouts"
+    - "pending request tracking and timeout sweeping"
+    - "endpoint discovery from metagraph"
+
+  local_execution:
+    - "in-process executor using the same interface as remote communication"
 
   result_management:
-    - task result storage interface
-    - result persistence for weight calculation
-    - output splitting (full result + raw output)
-    - error muxing (unified error stream)
+    - "task result storage with pluggable backends"
+    - "result accumulation for weight calculation"
+    - "timestamping of task execution"
+
+  resilience:
+    - "retry with configurable backoff"
+    - "error routing as typed messages through the pipeline"
+    - "context persistence and state recovery from logs"
+    - "transient pylon failure tolerance in chain producers"
+
+  entry_points:
+    - "HTTP server for accepting external requests into the pipeline"
+
+  integrations:
+    available:
+      - "S3-compatible storage with presigned URL generation"
+      - "OpenRouter for LLM inference"
+    planned: |
+      Bittensor-backed services are being integrated as available
+      building blocks. Check the source for the current set.
 
 # ============================================================================
-# DEVELOPER PROVIDES
+# SUBNET DEVELOPER PROVIDES (the domain-specific logic nexus cannot know)
 # ============================================================================
 
 developer_provides:
-  payload_creator:
-    what: "transform input → what the miner receives"
-    example: "generate task parameters, S3 presigned URLs"
+  description: |
+    These are the subnet-specific pieces that nexus needs as input to
+    execute the validator logic. They are typically small functions or
+    types injected as parameters into framework-provided building blocks.
 
-  result_converter:
-    what: "transform raw miner response → storable/scorable form"
-    example: "extract scores, validate response format"
+  payload_creation:
+    what: "how to transform pipeline input into what the miner receives"
+    example_concerns: "generate task parameters, prepare data for upload"
+
+  result_conversion:
+    what: "how to transform raw miner responses into a storable, scorable form"
+    example_concerns: "extract relevant fields, validate response format"
 
   weighing_function:
-    what: "read accumulated results → return hotkey→weight map"
-    this_is: "the subnet's scoring logic"
-    bittensor_ref: "validator.contract.yaml → scoring_patterns"
+    what: "how to turn accumulated task results into a hotkey-to-weight map"
+    this_is: "the subnet's core scoring logic"
 
   input_source:
     what: "what triggers task processing"
-    options: [REST endpoint, producer actor, external poller]
+    options: "HTTP endpoint, producer actor, external poller — or use the provided building blocks"
 
-  neuron_filter:
-    what: "which neurons to consider"
-    default: miners_only
-    custom: "any predicate on neuron data"
+  neuron_filtering:
+    what: "which neurons to consider for task routing"
+    note: "built-in filters exist for common cases; custom predicates can be provided"
 
   routing_strategy:
     what: "how to select from filtered neurons"
-    default: round_robin
-    custom: "any selection logic"
+    note: "built-in strategies exist; custom selection logic can be provided"
 
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
 
 configuration:
-  mechanism: environment variables
+  mechanism: "environment variables"
   no_config_files: true
+  discovery: |
+    Required and optional environment variables are defined alongside
+    the components that use them. Explore the source to find what each
+    component expects.
 
-  required:
-    VALIDATOR_PYLON_SERVICE_ADDRESS: "pylon URL"
-    VALIDATOR_PYLON_OPEN_ACCESS_TOKEN: "read token"
+# ============================================================================
+# RELATIONSHIP TO PYLON
+# ============================================================================
 
-  optional:
-    VALIDATOR_PYLON_IDENTITY_NAME: "for weight setting"
-    VALIDATOR_PYLON_IDENTITY_TOKEN: "for weight setting"
+pylon:
+  rule: "never use bittensor SDK directly — all chain communication goes through pylon"
+  nexus_uses_pylon_for:
+    - "block and epoch polling"
+    - "metagraph and neuron data"
+    - "weight submission"
+  developer_uses_pylon_for:
+    - "anything else that requires chain interaction (e.g., commitment management)"
+  see: "knowledge/pylon/ for pylon-specific knowledge"
