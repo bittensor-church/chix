@@ -1,9 +1,7 @@
 # Context
 
-ChiX is a template for a Bittensor subnet project. It is meant as a starting point for new projects, containing the
-necessary knowledge and structure to quickly bootstrap a new subnet. As an agent, use this template and modify it as
-needed. Once you start developing it, update this notice to reflect what the actual project is about and keep its
-template origin as a short note.
+Cat Inpainting Subnet -- a Bittensor subnet where miners add realistic cats to user-submitted images via inpainting.
+Built from the ChiX template for Bittensor subnet development.
 
 # Behavioral guidelines
 
@@ -54,7 +52,7 @@ uv run pytest -q --tb=line -r f
 - datetime.timedelta for durations, not raw seconds.
 - No hasattr/getattr on well-typed objects.
 - No dead code.
-- No assertions in production — raise specific exceptions.
+- No assertions in production -- raise specific exceptions.
 - Restructure over workaround.
 
 ## Comments

@@ -1,11 +1,13 @@
 [project]
-name = ""
+name = "cat-inpainting-subnet"
 version = "0.1.0"
-description = ""
+description = "Bittensor subnet for cat inpainting into user-submitted images"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "bittensor-nexus-lib",
+    "httpx>=0.28.1",
+    "pillow>=12.1.1",
 ]
 
 [tool.uv]
