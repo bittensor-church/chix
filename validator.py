@@ -24,7 +24,7 @@ from threading import Event as ThreadingEvent
 from typing import NewType
 
 import httpx
-from nexus.actors import AsyncHttpNeuronCommunicator, EpochBeatNode, RoundRobinNeuronRouter, miners_only
+from nexus.actors import AsyncHttpNeuronCommunicator, EpochBeatNode, RestEntryPoint, RoundRobinNeuronRouter, miners_only
 from nexus.actors.payload_creator import NoopPayloadCreator
 from nexus.actors.retry_strategy import RetryStrategy
 from nexus.actors.weight_setter import WeightsCalculationBundle, WeightSetterNode
@@ -92,6 +92,7 @@ class Settings(BaseSettings):
     openrouter_model: str = "google/gemini-2.5-flash"
     task_interval_seconds: float = 30.0
     max_latency_seconds: float = 120.0
+    organic_port: int = 9101
 
 
 # ---------------------------------------------------------------------------
@@ -384,6 +385,13 @@ class CatInpaintingValidator(NexusValidator):
             interval=timedelta(seconds=settings.task_interval_seconds),
         )
 
+        organic_entry = RestEntryPoint[InpaintingRequest](
+            _id="organic",
+            path="/inpaint",
+            port=settings.organic_port,
+            user_data_model=InpaintingRequest,
+        )
+
         epoch_beat = EpochBeatNode("epoch_beat", netuid=NetUid(settings.netuid))
 
         weight_setter = WeightSetterNode(
@@ -392,6 +400,8 @@ class CatInpaintingValidator(NexusValidator):
         )
 
         self.connect(producer.source, task.input)
+        self.connect(organic_entry.source, task.input)
+        self.connect(task.executor_output, organic_entry.sink)
         self.connect(epoch_beat.source, weight_setter.sink)
 
 
