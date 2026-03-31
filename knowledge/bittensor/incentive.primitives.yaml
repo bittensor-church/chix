@@ -87,11 +87,6 @@ verification_methods:
     benefit: "validators don't control ground truth"
 
 scoring_formulas:
-  ema:
-    formula: "new_score = alpha * instant + (1-alpha) * old"
-    alpha_range: [0.01, 0.5]
-    purpose: "smooth noise, build reputation"
-  
   crps:
     name: "Continuous Ranked Probability Score"
     use_when: "distribution predictions"
@@ -104,7 +99,7 @@ scoring_formulas:
     effect: "unique data scores higher"
   
   credibility:
-    formula: "verification_success_ema ^ 2.5"
+    formula: "verification_success_rate ^ 2.5"
     purpose: "exponential penalty for failures"
 
 weight_conversion:
@@ -122,14 +117,10 @@ weight_conversion:
     method: "negative beta in softmax"
 
 anti_gaming_measures:
-  coldkey_deduplication:
-    method: "highest scorer per coldkey wins"
-    limitation: "NOT sybil-proof"
-  
   credibility_tracking:
-    method: "EMA of verification success"
+    method: "track verification success rate"
     multiplier: "credibility^2.5"
-  
+
   time_decay:
     formula: "score * exp(-age * ln(2) / half_life)"
     purpose: "reward freshness"

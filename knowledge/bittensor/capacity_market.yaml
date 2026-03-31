@@ -35,7 +35,6 @@ architecture:
     window: "rolling 7 days"
     applies:
       - blacklists
-      - coldkey_deduplication
     scoring: "billed compute delivered"
     output: "normalized u16 weights"
 
@@ -45,7 +44,6 @@ gpu_verification:
 
 anti_gaming:
   graval_proofs: "cryptographic GPU verification"
-  coldkey_dedup: "highest scorer per coldkey only"
   billed_uptime: "prevents idle node registration"
 
 socket_pattern:

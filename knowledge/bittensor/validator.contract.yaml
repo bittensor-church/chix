@@ -16,7 +16,7 @@ responsibilities:
     - normalize_weights_correctly
     - submit_weights_periodically
     - handle_timeouts_gracefully
-    - track_scores_over_time_ema
+
     - apply_anti_gaming_measures
   
   DO_NOT:
@@ -59,12 +59,12 @@ core_loop:
     5_set_weights: "submit to chain"
     6_wait: "sleep until next cycle"
   nexus_mapping:
-    1_sync: "NeuronRouter via pylon cached metagraph"
-    2_sample: "NexusTask pipeline (routing → HTTP communicator → response)"
-    3_score: "developer-provided weighing_function"
-    4_aggregate: "developer-provided weighing_function"
-    5_set_weights: "WeightSetter actor → pylon.identity.put_weights()"
-    6_wait: "BlockBeat + EpochBeat drive timing (no manual sleep)"
+    1_sync: "neuron routing via pylon cached metagraph"
+    2_sample: "task pipeline (routing → communication → response)"
+    3_score: "developer-provided weighing function"
+    4_aggregate: "developer-provided weighing function"
+    5_set_weights: "weight setter actor → pylon"
+    6_wait: "chain-driven timing (no manual sleep)"
 
 communication:
   deprecated:
@@ -74,17 +74,8 @@ communication:
 
   recommended:
     protocol: "HTTP/REST"
-    signing: epistula
     discovery: "miners commit endpoints to chain"
-    realized_by:
-      http: "nexus AsyncHttpNeuronCommunicator"
-      discovery: "nexus NeuronRouter via pylon metagraph"
-      epistula: "not yet in nexus — manual or future addition"
-  
-  epistula_headers:
-    - "X-Epistula-Timestamp": "nonce"
-    - "X-Epistula-Signature": "signed(nonce.body_hash)"
-    - "X-Epistula-Hotkey": "hotkey_ss58"
+    realized_by: "nexus handles HTTP communication and neuron discovery via pylon"
 
 scoring_patterns:
   multi_dimensional:
@@ -102,12 +93,8 @@ scoring_patterns:
   tournament:
     formula: "1.0 - (rank / n)"
   
-  ema_accumulation:
-    formula: "alpha * new_score + (1 - alpha) * old_score"
-    age_adjustment: "new miners: higher alpha"
-
 weight_setting:
-  realized_by: "nexus WeightSetter → pylon (normalization, commit-reveal, retries)"
+  realized_by: "nexus weight setter → pylon (normalization, commit-reveal, retries)"
   normalization: "weights must sum to 1"
   conversion:
     softmax:
@@ -129,10 +116,6 @@ weight_setting:
       3: "reveal(weights)"
 
 anti_gaming:
-  coldkey_deduplication:
-    method: "keep only highest-scoring hotkey per coldkey"
-    limitation: "NOT sybil-proof (see rules/sybil.realities.yaml)"
-  
   rate_gaming_detection:
     method: "check variance of response times"
     suspicious: "very low variance"

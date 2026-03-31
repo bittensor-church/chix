@@ -71,7 +71,7 @@ scoring:
   DO:
     - define_clear_criteria
     - be_deterministic
-    - use_ema_for_stability
+
     - handle_timeouts_gracefully
     - normalize_weights_correctly
   
@@ -88,10 +88,6 @@ weight_setting:
     period: "50-100 blocks insufficient"
 
 anti_gaming:
-  coldkey_dedup:
-    method: "keep highest scorer per coldkey"
-    limitation: "NOT sybil-proof"
-  
   similarity_detection:
     status: UNRELIABLE
     rule: "easier to evade than enforce"

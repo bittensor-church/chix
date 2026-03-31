@@ -41,10 +41,6 @@ architecture:
       combined:
         formula: "quality_weight * quality + efficiency_weight * efficiency"
     
-    ema_accumulation:
-      alpha_new_miners: "higher (adapt quickly)"
-      alpha_established: "lower (stable)"
-
 baseline_comparison:
   method: "score relative to known baseline"
   example: "OpenMeteo for weather"
@@ -55,7 +51,7 @@ anti_gaming:
   immediate_timeout_penalty: "malformed/late = 0"
   delayed_ground_truth: "can't game before event"
   baseline_relative: "must beat known source"
-  ema_smoothing: "prevents single-shot gaming"
+  score_accumulation: "prevents single-shot gaming"
 
 selection_criteria:
   use_when:

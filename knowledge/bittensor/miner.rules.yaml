@@ -22,7 +22,6 @@ communication:
   
   recommended:
     protocol: http_rest
-    signing: epistula
     discovery: chain_commitments
 
   endpoint_commitment:
@@ -40,7 +39,6 @@ patterns:
     recommended: true
     framework: ["fastapi", "flask"]
     requirements:
-      - epistula_signature_verification
       - validator_permit_check
       - request_validation
       - proper_logging
@@ -61,17 +59,6 @@ patterns:
     commit: "image URL to chain"
     execution: "validator runs via Basilica"
 
-epistula_verification:
-  headers:
-    timestamp: "X-Epistula-Timestamp"
-    signature: "X-Epistula-Signature"
-    hotkey: "X-Epistula-Hotkey"
-  
-  validation:
-    timestamp_freshness: "abs(now - ts) < 60 seconds"
-    signature_verify: "keypair.verify(message, signature)"
-    caller_is_validator: "check metagraph.validator_permit"
-
 checklist:
   registration:
     - create_wallet
@@ -80,7 +67,6 @@ checklist:
   
   endpoint:
     - implement_required_endpoints
-    - add_epistula_verification
     - commit_endpoint_to_chain
   
   operation:

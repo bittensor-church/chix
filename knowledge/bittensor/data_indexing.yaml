@@ -64,7 +64,7 @@ architecture:
         output: "match rate"
     
     scoring_components:
-      credibility: "EMA of validation success"
+      credibility: "tracked validation success rate"
       scorable_bytes: "unique data contribution"
       raw_score: "source_weight × scale × time_freshness × scorable_bytes"
       final_score: "raw_score × credibility^2.5"
@@ -76,16 +76,16 @@ scorable_bytes_formula:
 
 anti_gaming:
   deep_validation: "catches fake/fabricated data"
-  credibility_ema: "builds slowly, lost quickly"
+  credibility_tracking: "builds slowly, lost quickly"
   scorable_bytes: "penalizes duplication"
   time_freshness: "rewards recent data"
 
 scoring:
   credibility:
-    update: "EMA of verification pass/fail"
+    update: "track verification pass/fail rate"
     multiplier: "credibility^2.5"
     effect: "exponential penalty for failures"
-  
+
   uniqueness:
     formula: "s²/S"
     explanation: "square of miner bytes / total bytes"

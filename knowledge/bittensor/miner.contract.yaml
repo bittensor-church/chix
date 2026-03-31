@@ -31,7 +31,6 @@ communication:
       framework_examples:
         - fastapi
         - flask
-      authentication: epistula
       discovery: "commit endpoint to chain"
     
     orchestrator_socket:
@@ -79,18 +78,12 @@ architecture_patterns:
   http_api_miner:
     structure:
       - fastapi_app
-      - epistula_verification
       - validator_check
       - request_handler
     endpoints:
       required: "defined by validator spec"
       health: "/health"
     
-    epistula_verification:
-      check_timestamp: "abs(now - ts) < 60s"
-      verify_signature: "kp.verify(message, sig)"
-      verify_validator: "check metagraph"
-  
   orchestrator_miner:
     connection: "socket.io to central"
     auth: "hotkey signature"
@@ -121,7 +114,7 @@ common_components:
 checklist:
   - register_hotkey
   - implement_commodity_provision
-  - handle_epistula_verification
+  - handle_request_verification
   - commit_endpoint_to_chain
   - add_logging
   - test_with_validators

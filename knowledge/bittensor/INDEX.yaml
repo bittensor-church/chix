@@ -41,7 +41,6 @@ files_by_category:
     hippius.integration.yaml: "SN75 decentralized storage, S3/IPFS, provenance"
     desearch.integration.yaml: "SN22 real-time search, Twitter/Reddit/web data"
     dataverse.integration.yaml: "SN13 social data API, X and Reddit scraping"
-    sdk.quick_reference.yaml: "Python SDK patterns, token trading"
     btcli.reference.yaml: "CLI command reference"
     local.development.yaml: "local subtensor setup"
     ops.principles.yaml: "deployment, monitoring, operations"
@@ -80,7 +79,6 @@ task_routing:
   local_development:
     load:
       - local.development.yaml
-      - sdk.quick_reference.yaml
       - btcli.reference.yaml
 
   container_agent_subnet:
@@ -123,10 +121,6 @@ task_routing:
   cli_operations:
     load:
       - btcli.reference.yaml
-
-  token_trading:
-    load:
-      - sdk.quick_reference.yaml
 
   studying_example_subnets:
     load:

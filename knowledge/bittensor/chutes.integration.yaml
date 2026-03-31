@@ -60,14 +60,6 @@ authentication:
       chute_ids: "specific chutes only"
       images: "image management"
   
-  epistula_for_validators:
-    purpose: "hotkey-based auth for free queries"
-    headers:
-      - "X-Epistula-Timestamp"
-      - "X-Epistula-Signature"
-      - "X-Epistula-Hotkey"
-      - "X-Epistula-Netuid"
-
 validator_free_access:
   method: "hotkey signature verification"
   config: |
