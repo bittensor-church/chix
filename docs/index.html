@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chi, ChiX, Nexus and the next steps</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --line: #e2e8f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body { line-height: 1.45; }
+    .page {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+    .hero {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 28px 28px 24px;
+      margin-bottom: 22px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: var(--blue-soft);
+      border-radius: 999px;
+      padding: 7px 12px;
+    }
+    h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+    }
+    .lead {
+      margin: 0;
+      font-size: clamp(17px, 2vw, 21px);
+      color: var(--muted);
+      max-width: 1100px;
+    }
+    .headline {
+      margin: 18px 0 12px;
+      font-size: clamp(20px, 2.6vw, 28px);
+      font-weight: 800;
+      color: var(--text);
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0 4px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+    }
+    .compare-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .compare-scroll {
+      overflow: auto;
+      max-height: calc(100vh - 120px);
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 1180px;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+      padding: 0;
+    }
+    th:first-child, td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: inherit;
+    }
+    thead th:first-child { z-index: 6; }
+    .cap-head {
+      text-align: left;
+      padding: 24px 18px;
+      min-width: 420px;
+      font-size: 14px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.96);
+    }
+    .plan-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 128px;
+      padding: 16px;
+      border-left: 1px solid var(--line);
+      text-align: center;
+    }
+    .plan-head.primary {
+      background: linear-gradient(180deg, #f6faff 0%, #ffffff 100%);
+      box-shadow: inset 0 -3px 0 var(--blue);
+    }
+    .plan-name {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 8px 0 6px;
+    }
+    .plan-sub {
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 240px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+    .badge-current { background: #ecfeff; color: #155e75; border-color: #bae6fd; }
+    .badge-best { background: var(--blue); color: white; }
+    tbody td, tbody th {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      vertical-align: middle;
+    }
+    tbody td + td, tbody th + td, thead th + th { border-left: 1px solid var(--line); }
+    .cat-row td, .cat-row th {
+      background: #f8fafc;
+      font-weight: 800;
+      color: var(--text);
+      border-top: 1px solid var(--line);
+    }
+    .cap {
+      font-weight: 600;
+      text-align: left;
+      background: #fff;
+    }
+    .mark {
+      text-align: center;
+      font-size: 18px;
+      line-height: 1.3;
+      min-width: 180px;
+    }
+    .mark.small {
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .note {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    @media (max-width: 900px) {
+      .page { padding: 18px 12px 32px; }
+      .hero { padding: 20px 18px; border-radius: 22px; }
+      .compare-wrap { border-radius: 22px; }
+      .compare-scroll { max-height: none; }
+      .cap-head { min-width: 300px; }
+      .plan-name { font-size: 20px; }
+      .mark { min-width: 140px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="eyebrow">Comparison</div>
+      <h1>Chi, ChiX, Nexus and the next steps</h1>
+      <p class="lead">A proudly Bittensor-gnostic framework for building production-ready subnets — not a set of PoC scripts</p>
+      <div class="headline">Subnets should be one-shotted, not hand-built.</div>
+      <p class="lead">ChiX (with Nexus underneath) turns a subnet concept into a production-grade system — even from a single LLM prompt.</p>
+      <div class="legend">
+        <span class="pill"><strong>Chi</strong>: ✅ implemented · ⛔ not supported</span>
+        <span class="pill"><strong>ChiX</strong>: ✅ implemented · 🚧 in progress · ⛔ not supported</span>
+        <span class="pill"><strong>Next steps</strong>: 🟢 core · 🟡 supporting · 🔹 experimental</span>
+      </div>
+    </section>
+
+    <section class="compare-wrap">
+      <div class="compare-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="cap-head">Capability</th>
+              <th>
+                <div class="plan-head">
+                  <span class="badge badge-current">Original</span>
+                  <div class="plan-name">Chi</div>
+                  <div class="plan-sub">Existing design guidance and baseline implementation.</div>
+                </div>
+              </th>
+              <th>
+                <div class="plan-head">
+                  <span class="badge badge-current">Current PoC</span>
+                  <div class="plan-name">ChiX v1</div>
+                  <div class="plan-sub">Today’s extension with implemented and in-progress production features.</div>
+                </div>
+              </th>
+              <th>
+                <div class="plan-head primary">
+                  <span class="badge badge-best">Planned</span>
+                  <div class="plan-name">Next steps</div>
+                  <div class="plan-sub">Core, supporting, and experimental capabilities to prioritize together.</div>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="cat-row"><th class="cap">✨ Bittensor framing guidance</th><td></td><td></td><td></td></tr>
+            <tr><th class="cap">Mechanism design</th><td class="mark">✅</td><td class="mark">✅</td><td class="mark">✅</td></tr>
+            <tr><th class="cap">Incentive patterns</th><td class="mark small">✅ (basic)</td><td class="mark small">✅ (basic)</td><td class="mark small">✅ (production ready)</td></tr>
+            <tr><th class="cap">Anti-gaming mechanisms</th><td class="mark small">✅ (basic)</td><td class="mark small">✅ (basic)</td><td class="mark small">✅ (production ready)</td></tr>
+            <tr><th class="cap">Miner-validator contract</th><td class="mark small">✅ (basic)</td><td class="mark small">✅ (basic)</td><td class="mark small">✅ (production ready)</td></tr>
+            <tr><th class="cap">External integration examples</th><td class="mark">✅</td><td class="mark">✅</td><td class="mark">✅</td></tr>
+            <tr><th class="cap">Successful subnet case studies</th><td class="mark">✅</td><td class="mark">✅</td><td class="mark">✅</td></tr>
+
+            <tr class="cat-row"><th class="cap">🛡 Security &amp; Trust</th><td></td><td></td><td></td></tr>
+            <tr><th class="cap">Anti–Weight-Copier Hyperparameters (Liquid Alpha)</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟢</td></tr>
+            <tr><th class="cap">Commit–Reveal</th><td class="mark">✅</td><td class="mark">✅</td><td class="mark">✅</td></tr>
+            <tr><th class="cap">Validator Hotkey Isolation (Pylon)</th><td class="mark">⛔</td><td class="mark">✅</td><td class="mark">✅</td></tr>
+            <tr><th class="cap">mTLS Miner–Validator Authentication and communication encryption</th><td class="mark small">⛔<div class="note">epistula signing present though</div></td><td class="mark">⛔</td><td class="mark">🟡</td></tr>
+            <tr><th class="cap">DDoS Shield for Miners</th><td class="mark">⛔</td><td class="mark">🚧</td><td class="mark">🟡</td></tr>
+            <tr><th class="cap">Miner Collateral &amp; Slashing</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟡</td></tr>
+            <tr><th class="cap">Validator Runtime Image Attestation</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🔹</td></tr>
+            <tr><th class="cap">Miner “Dancing”</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🔹</td></tr>
+            <tr><th class="cap">Relay Mining Protection</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🔹</td></tr>
+            <tr><th class="cap">Proof-of-Weights</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🔹</td></tr>
+
+            <tr class="cat-row"><th class="cap">⚙️ Reliability &amp; Infrastructure Performance</th><td></td><td></td><td></td></tr>
+            <tr><th class="cap">Reliable Weight Setting (Chain Instability)</th><td class="mark">⛔</td><td class="mark">✅</td><td class="mark">✅</td></tr>
+            <tr><th class="cap">Resiliency to Restarts</th><td class="mark">⛔</td><td class="mark small">⛔<div class="note">the validator is functional after restart, but the state is not persisted and interrupted operations are not resumed</div></td><td class="mark">✅</td></tr>
+            <tr><th class="cap">Retries &amp; Timeouts Framework</th><td class="mark">⛔</td><td class="mark">✅</td><td class="mark">✅</td></tr>
+            <tr><th class="cap">Connection Pooling</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟢</td></tr>
+            <tr><th class="cap">Metagraph Caching</th><td class="mark">⛔</td><td class="mark">✅</td><td class="mark">✅</td></tr>
+            <tr><th class="cap">Compute Scalability</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🔹</td></tr>
+            <tr><th class="cap">Failure isolation / locality</th><td class="mark">⛔</td><td class="mark">✅</td><td class="mark">✅</td></tr>
+
+            <tr class="cat-row"><th class="cap">🧠 Subnet Operating Patterns</th><td></td><td></td><td></td></tr>
+            <tr><th class="cap">Synthetic Challenge Pattern</th><td class="mark">⛔</td><td class="mark">🚧</td><td class="mark">🟢</td></tr>
+            <tr><th class="cap">Organic Task Flow Pattern</th><td class="mark">⛔</td><td class="mark">✅</td><td class="mark">✅</td></tr>
+            <tr><th class="cap">Knowledge Commitment Pattern</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟢</td></tr>
+            <tr><th class="cap">Double Payment Monetization</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🔹</td></tr>
+
+            <tr class="cat-row"><th class="cap">🔄 Validator Oversight &amp; Coordination</th><td></td><td></td><td></td></tr>
+            <tr><th class="cap">Validator Autoupdater</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟢</td></tr>
+            <tr><th class="cap">Dynamic On-Chain Configuration</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟢</td></tr>
+            <tr><th class="cap">Validator Metrics System</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟢</td></tr>
+            <tr><th class="cap">Logs &amp; Error Tracking (Sentry)</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟢</td></tr>
+            <tr><th class="cap">Grafana Dashboards</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟡</td></tr>
+            <tr><th class="cap">Audit Log Inspection</th><td class="mark">⛔</td><td class="mark small">⛔<div class="note">all activity is put into audit log, but there is no inspection facility yet</div></td><td class="mark">🟡</td></tr>
+            <tr><th class="cap">Stake-Based Voting</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🔹</td></tr>
+
+            <tr class="cat-row"><th class="cap">📦 DevEx &amp; Supply Chain</th><td></td><td></td><td></td></tr>
+            <tr><th class="cap">Supply Chain Setup (CI/CD, Docker, PyPI)</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟢</td></tr>
+            <tr><th class="cap">Validator Image Build Pipeline</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟢</td></tr>
+            <tr><th class="cap">Local &amp; Automated Testing</th><td class="mark">⛔</td><td class="mark">⛔</td><td class="mark">🟢</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
