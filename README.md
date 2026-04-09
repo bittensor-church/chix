@@ -1,17 +1,24 @@
+# Nexus
 
-# chix
-
-> AI-assisted subnet template. Vibe-code your bittensor validator from idea to production.
+> A proudly Bittensor-gnostic framework for building production-ready subnets.
 >
-> [Chi](https://github.com/unconst/Chi)'s brain, [Nexus](https://github.com/bittensor-church/nexus-poc/tree/master/nexus-template)'s backbone.
+> [Chi](https://github.com/unconst/Chi)'s brain, Nexus's backbone.
 
-## Why ChiX?
+Subnets should be one-shotted, not hand-built. Nexus turns a subnet concept into a production-grade system — even from a
+single LLM prompt.
+
+## Usage
+
+1. Clone this repo into your AI coding agent of choice
+2. "How do I make [your subnet idea]?"
+
+## What you get
 
 <table>
 <tr>
 <td width="33%" valign="top">
 
-**Chi — Domain Intelligence**
+**Chi**
 
 - Idea → mechanism design
 - Proven incentive patterns
@@ -21,28 +28,28 @@
 </td>
 <td width="34%" valign="top">
 
-**⭐ ChiX — Design to Deploy**
+**Nexus v0 (current)**
 
-- Chi's brain, Nexus's backbone
-- Production validator, one sitting
-- Wires everything for you
-
-**Describe your idea, deploy**
+- Production-ready vibe-codable validator
+- Transparently reliable subtensor communication
+- Prebuilt blocks for common subnet patterns
+- Localnet-backed setup for rapid prototyping and keeping your agents on track
 
 </td>
 <td width="33%" valign="top">
 
-**Nexus — Production Runtime**
+**Nexus (next steps)**
 
-- Battle-ready validator blocks
-- Wraps bittensor complexity you'll discover the hard way
-- Wire together, ship, stay online
+- Restart resiliency
+- Miner <-> validator authentication and encryption
+- Autoupdating and dynamic config
+- Observability via metrics, Sentry, Grafana
+- Supply chain: CI/CD, Docker, PyPI
+
+See [the full comparison](https://bittensor-church.github.io/nexus-template/) for more.
 
 </td>
 </tr>
 </table>
 
-## Usage
 
-1. Clone this repo into your AI coding agent of choice
-2. "How do I make [your subnet idea]?"

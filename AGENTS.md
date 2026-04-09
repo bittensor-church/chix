@@ -1,7 +1,7 @@
 # Context
 
-ChiX is a template for a Bittensor subnet project. It is meant as a starting point for new projects, containing the
-necessary knowledge and structure to quickly bootstrap a new subnet. As an agent, use this template and modify it as
+This project is a template for a Bittensor subnet project. It is meant as a starting point for new projects, containing
+the necessary knowledge and structure to quickly bootstrap a new subnet. As an agent, use this template and modify it as
 needed. Once you start developing it, update this notice to reflect what the actual project is about and keep its
 template origin as a short note.
 
