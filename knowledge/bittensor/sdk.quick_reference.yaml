@@ -1,0 +1,118 @@
+# Bittensor Python SDK Quick Reference
+# Used by localnet scripts (bootstrap.py, miner.py) — NOT by the validator itself
+
+installation:
+  packages:
+    - bittensor
+    - bittensor-wallet
+
+subtensor:
+  init: |
+    from bittensor import Subtensor
+    subtensor = Subtensor(network="finney")  # or "test", "local", "ws://127.0.0.1:9944"
+
+  queries:
+    block: "subtensor.get_current_block()"
+    balance: "subtensor.get_balance(coldkey_ss58)"
+    subnet_exists: "subtensor.subnet_exists(netuid)"
+    hyperparams: "subtensor.get_subnet_hyperparameters(netuid)"
+    is_registered: "subtensor.is_hotkey_registered(hotkey_ss58, netuid)"
+    uid_for_hotkey: "subtensor.get_uid_for_hotkey_on_subnet(hotkey_ss58, netuid)"
+    metagraph: "subtensor.metagraph(netuid)"
+
+  transactions:
+    register: "subtensor.burned_register(wallet, netuid)"
+    transfer: |
+      subtensor.transfer(
+          wallet=source_wallet,
+          destination_ss58=target_ss58,
+          amount=Balance.from_tao(1000.0),
+          mev_protection=False,
+      )
+    add_stake: |
+      subtensor.add_stake(
+          wallet=wallet,
+          netuid=netuid,
+          hotkey_ss58=wallet.hotkey.ss58_address,
+          amount=Balance.from_tao(1000.0),
+      )
+    set_weights: |
+      subtensor.set_weights(
+          wallet=wallet,
+          netuid=netuid,
+          uids=[0, 1, 2],
+          weights=[0.5, 0.3, 0.2],
+          wait_for_inclusion=True,
+      )
+    serve_axon: |
+      subtensor.serve_axon(
+          netuid=netuid,
+          axon=bt.Axon(wallet=wallet, port=8091, ip="127.0.0.2", external_ip="127.0.0.2"),
+          # 127.0.0.1 is silently rejected by subtensor; use 127.0.0.2 on localnet
+      )
+    commit: "subtensor.set_commitment(wallet, netuid, data)"
+    register_subnet: |
+      response = subtensor.register_subnet(wallet=owner)  # returns ExtrinsicResponse
+      # find netuid: newest subnet owned by this coldkey
+      subnets = subtensor.all_subnets()  # list[DynamicInfo]
+      owned = [s for s in subnets if s.owner_coldkey == owner.coldkey.ss58_address]
+      netuid = max(owned, key=lambda s: s.network_registered_at).netuid
+    activate_subnet: |
+      # required after register_subnet — subnet is inactive until start_call
+      delay = subtensor.get_start_call_delay().value  # ScaleObj, use .value for int
+      subtensor.wait_for_block(subtensor.get_current_block() + delay + 1)
+      subtensor.start_call(wallet=owner, netuid=netuid)
+
+  commitments:
+    rate_limit: "1 per 100 blocks (~20 minutes) — commit location, not individual items"
+    write: "subtensor.set_commitment(wallet, netuid, data)"
+    read_all: "subtensor.get_all_commitments(netuid)"
+
+balance:
+  import: "from bittensor.utils.balance import Balance"
+  from_tao: "Balance.from_tao(1000.0)"
+  from_rao: "Balance.from_rao(1000000000)"
+  constructor: "Balance(int) → rao, Balance(float) → tao"
+  comparison: "subtensor.get_balance(addr) returns Balance — supports <, >, == with other Balance"
+
+wallet:
+  init: |
+    from bittensor_wallet import Wallet
+    wallet = Wallet(name="my_wallet", path="/path/to/wallets")
+    wallet.create_if_non_existent(coldkey_use_password=False, hotkey_use_password=False)
+
+  alice: "Keypair.create_from_uri('//Alice') — pre-funded devnet account, use for transfers"
+
+  addresses:
+    coldkey: "wallet.coldkey.ss58_address"
+    hotkey: "wallet.hotkey.ss58_address"
+
+metagraph:
+  init: |
+    metagraph = subtensor.metagraph(netuid)
+
+  arrays:
+    S: "stake"
+    I: "incentive"
+    D: "dividends"
+    E: "emission"
+    T: "trust"
+    C: "consensus"
+    R: "rank"
+    hotkeys: "hotkey SS58 addresses"
+    coldkeys: "coldkey SS58 addresses"
+    validator_permit: "bool — can validate"
+
+  access: |
+    stake = metagraph.S[uid]
+    hotkey = metagraph.hotkeys[uid]
+    uid = metagraph.hotkeys.index(hotkey_ss58)
+
+extrinsic_response:
+  note: all transactions return ExtrinsicResponse, not bool or tuple
+  fields: ".success (bool), .message (str), .error (Exception | None)"
+
+common_patterns:
+  ensure_registered: |
+    if not subtensor.is_hotkey_registered(wallet.hotkey.ss58_address, netuid):
+        subtensor.burned_register(wallet=wallet, netuid=netuid)

@@ -3,10 +3,19 @@
 
 architecture:
   validator_only_development:
-    rule: "ONLY write validator.py. NEVER write miner code."
+    rule: "ONLY write validator.py. NEVER write production miner code."
     rationale: "Validators define the game; miners infer how to play"
-    enforcement: "single-file pattern"
-    violation_indicator: "miner/ directory or reference implementations"
+    enforcement: "single-file pattern for production code"
+    violation_indicator: "miner code in production paths (root, src/)"
+    exception:
+      localnet_stub_miners:
+        permitted: true
+        location: "localnet/"
+        purpose: "local end-to-end testing only"
+        constraints:
+          - "clearly marked as test fixtures"
+          - "never shipped as production code"
+          - "minimal — just enough to test the validator"
 
   primary_design_axis:
     question: "What am I actually measuring?"

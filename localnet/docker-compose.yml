@@ -1,0 +1,32 @@
+services:
+  subtensor:
+    image: ghcr.io/opentensor/subtensor-localnet:devnet-ready
+    ports:
+      - "9944:9944"
+      - "9933:9933"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/9944'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  pylon:
+    image: backenddevelopersltd/bittensor-pylon:latest
+    ports:
+      - "8000:8000"
+    environment:
+      PYLON_BITTENSOR_NETWORK: "ws://subtensor:9944"
+      PYLON_OPEN_ACCESS_TOKEN: "localnet-open-access-token"
+      PYLON_IDENTITIES: '["validator"]'
+      PYLON_BITTENSOR_WALLET_PATH: "/wallets"
+      PYLON_TEMPO: "10"
+      # Identity: maps "validator" identity to the validator wallet created by bootstrap
+      PYLON_ID_VALIDATOR_WALLET_NAME: "validator"
+      PYLON_ID_VALIDATOR_HOTKEY_NAME: "default"
+      PYLON_ID_VALIDATOR_NETUID: "2"
+      PYLON_ID_VALIDATOR_TOKEN: "localnet-validator-token"
+    volumes:
+      - ./wallets:/wallets:ro
+    depends_on:
+      subtensor:
+        condition: service_healthy
