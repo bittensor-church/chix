@@ -5,64 +5,65 @@ the necessary knowledge and structure to quickly bootstrap a new subnet. As an a
 needed. Once you start developing it, update this notice to reflect what the actual project is about and keep its
 template origin as a short note.
 
-# Behavioral guidelines
+# Knowledge base
 
-ALWAYS start by reading knowledge/INDEX.yaml directly - follow any instructions within. Discover ALL relevant rules,
-gates, invariants, expectations relevant to your tasks and make sure they are satisfied at all times.
+ALWAYS start by discovering the information we have available in the knowledge base:
 
-# Coding guidelines
+- list the knowledge base files with `find knowledge -type f | sort`
+- directly read all INDEX files
 
-## Project preparation
+NEVER summarize index files. NEVER delegate reading them to other agents.
 
-```uv sync --all-groups```
+Read other files as needed.
 
-## Tech to use
+## knowledge/bootstrap.md
 
-- Python 3.14
-- astral uv
-- basedpyright strict mode
-- ruff for linting and formatting
-- pytest
-- litestar for HTTP endpoints
-- nexus as a framework for validator (no bittensor dependency)
-- pylon for subtensor communication
+Specific guidelines, quality gates, workflows for executing subnet design and implementation tasks.
 
-Read nexus and pylon source from .venv when you need to research them.
+## Bittensor
 
-NEVER use `pip`, NEVER use `python` directly. `uv` has all the tools you need:
+index: knowledge/bittensor/INDEX.yaml
 
-- `uv add ...` to add dependencies
-- `uv run ...` to run code
-- `uv run python ...` to run python
+- critical knowledge about the specifics of framing subnet ideas into the bittensor ecosystem
+- critical technical requirements and invariants that must be satisfied by subnet design and code
+- mechanism patterns and existing subnet case studies
+- suggested external integrations and tools
 
-## QA gates
+## Nexus
 
-All must pass. Run in order.
+Nexus is the framework for building Bittensor subnet validators. It replaces the
+bittensor SDK for validator development. All validator code runs inside Nexus — it is
+the complete runtime. You must use Nexus for implementing the validator.
 
-```sh
-uv run ruff check --fix && uv run ruff format
-uv run basedpyright
-uv run pytest -q --tb=line -r f
-```
+Nexus provides a large set of reusable components that handle common validator concerns.
+Before writing any code, making any decisions, or responding with recommendations —
+discover what Nexus offers. It will likely already handle most of the requirements
+of the subnet you are about to build.
 
-## Code style
+The Nexus knowledge base ships with the Nexus package — find it in `.venv` within the
+installed Nexus package under `docs/`. Make sure Nexus is installed first (follow this
+project's package management guidelines). Read `docs/nexus.md` in the Nexus package — it is the grounding document for all
+validator development work in this project.
 
-- All imports at top of file. No inline imports.
-- Short, concise code. Avoid deep nesting.
-- Well-typed. Prefer typed structures over dicts.
-- Domain types over bare str/int/float. Use NewType or typed wrappers for semantic values.
-- datetime.timedelta for durations, not raw seconds.
-- No hasattr/getattr on well-typed objects.
-- No dead code.
-- No assertions in production — raise specific exceptions.
-- Restructure over workaround.
+Nexus uses Pylon for all subtensor (blockchain) communication. Never use bittensor SDK
+directly.
 
-## Comments
+## localnet
 
-- Never restate what code does.
-- Do explain non-obvious logic and gotchas.
+Everything needed to bootstrap, run and test subnet code locally.
+Contains templates, recipes, requirements, operational guidelines, best practices, gotchas and much more.
 
-## Documentation
+index: knowledge/localnet/INDEX.md
 
-- Keep README.md, AGENTS.md, docstrings in sync with code.
-- Document public classes, functions, modules.
+## knowledge/coding.md
+
+Guidelines for working with the code.
+Conventions, tooling, best practices, QA gates, comments, documentation and more.
+
+Only load this file for tasks that involve writing or modifying code. Skip it during
+design-only work such as subnet mechanism design.
+
+# Additional rules
+
+- Keep README.md, AGENTS.md, tests, docstrings and code in sync. If one changes, update the others.
+
