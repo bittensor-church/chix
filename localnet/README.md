@@ -32,7 +32,9 @@ uv run python validator.py
 
 The `.env.example` is pre-configured to connect to the local pylon.
 
-## Miner stubs
+## Miner fixtures
+
+Good miner profiles only. Adversarial profiles are TODO.
 
 Each miner profile is a standalone script in `localnet/miners/`. Copy `miner.template.py` to create a new profile:
 

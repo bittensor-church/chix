@@ -9,7 +9,7 @@
 # ]
 # ///
 """
-Localnet stub miner template.
+Localnet miner fixture template.
 
 Models a miner accepting work from a validator via an HTTP POST request.,
 then POSTing the result back to the validator via a callback URL.
