@@ -32,8 +32,8 @@ Guidelines for completing tasks when working on Bittensor subnets. If a task mat
 **requires:** validator implemented
 **grounding knowledge:** bittensor/subnet.lifecycle, localnet
 **definition of done:**
-- localnet/docker-compose.yml adapted to subnet
-- localnet/.env.example adapted to subnet
+- compose.yml adapted to subnet
+- .env.example adapted to subnet; grouped; tweakable vars first, then constants
 - localnet/bootstrap.py adapted to subnet if needed
 - miner stub profiles created from miner.template.py
 - README.md updated; added: required config, steps to run locally, managing localnet setup, running validator, running miner stubs

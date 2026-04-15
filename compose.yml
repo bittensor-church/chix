@@ -16,17 +16,17 @@ services:
       - "8000:8000"
     environment:
       PYLON_BITTENSOR_NETWORK: "ws://subtensor:9944"
-      PYLON_OPEN_ACCESS_TOKEN: "localnet-open-access-token"
-      PYLON_IDENTITIES: '["validator"]'
+      PYLON_OPEN_ACCESS_TOKEN: "${VALIDATOR_PYLON_OPEN_ACCESS_TOKEN:?}"
+      PYLON_IDENTITIES: '["${VALIDATOR_PYLON_IDENTITY_NAME:?}"]'
       PYLON_BITTENSOR_WALLET_PATH: "/wallets"
-      PYLON_TEMPO: "10"
-      # Identity: maps "validator" identity to the validator wallet created by bootstrap
-      PYLON_ID_VALIDATOR_WALLET_NAME: "validator"
+      PYLON_TEMPO: "${SUBNET_TEMPO:?}"
+      # Identity: maps identity name to the validator wallet created by bootstrap
+      PYLON_ID_VALIDATOR_WALLET_NAME: "${VALIDATOR_PYLON_IDENTITY_NAME:?}"
       PYLON_ID_VALIDATOR_HOTKEY_NAME: "default"
-      PYLON_ID_VALIDATOR_NETUID: "2"
-      PYLON_ID_VALIDATOR_TOKEN: "localnet-validator-token"
+      PYLON_ID_VALIDATOR_NETUID: "${NETUID:?}"
+      PYLON_ID_VALIDATOR_TOKEN: "${VALIDATOR_PYLON_IDENTITY_TOKEN:?}"
     volumes:
-      - ./wallets:/wallets:ro
+      - ./localnet/wallets:/wallets:ro
     depends_on:
       subtensor:
         condition: service_healthy

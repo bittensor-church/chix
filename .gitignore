@@ -4,5 +4,4 @@ __pycache__/
 *.pyc
 .env
 .env.*
-!localnet/.env.example
-localnet/wallets/
+!.env.example

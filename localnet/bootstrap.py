@@ -3,6 +3,7 @@
 # dependencies = [
 #     "bittensor",
 #     "bittensor-wallet",
+#     "python-dotenv",
 # ]
 # ///
 """
@@ -13,6 +14,10 @@ Sets up the local subnet infrastructure:
 - Creates and activates subnet (netuid 2, since netuid 1 is owned by zero-key)
 - Registers and stakes validator neuron
 
+register_subnet has no netuid parameter — the chain auto-assigns the next free slot. We
+assume it matches NETUID from .env and abort if not, so pylon/validator/monitor don't
+end up pointed at a different subnet than the one we configured.
+
 Prerequisites: subtensor must be running (docker compose up).
 
 Usage: uv run localnet/bootstrap.py
@@ -20,20 +25,34 @@ Usage: uv run localnet/bootstrap.py
 
 from __future__ import annotations
 
+import os
 import sys
 import time
 from pathlib import Path
 
 import bittensor as bt
+from bittensor.core.extrinsics.pallets import Sudo
 from bittensor.utils.balance import Balance
 from bittensor_wallet import Keypair, Wallet
+from dotenv import load_dotenv
+
+load_dotenv()
 
 WALLETS_DIR = Path(__file__).parent / "wallets"
 SUBTENSOR_NETWORK = "ws://127.0.0.1:9944"
-# netuid 1 is pre-owned by zero-key in the devnet image — nobody has its private key
-EXPECTED_NETUID = 2
 VALIDATOR_STAKE_TAO = 1000.0
 FUND_AMOUNT_TAO = 10_000.0
+
+EXPECTED_NETUID = int(os.environ["NETUID"])
+SUBNET_TEMPO = int(os.environ["SUBNET_TEMPO"])
+
+# Disabled until we have support for fast blocks in pylon
+SUBNET_COMMIT_REVEAL_ENABLED = False
+
+# AdminFreezeWindow gates subnet-owner admin extrinsics during the last N blocks of each
+# tempo. Disabled on localnet so bootstrap/operator hyperparameter calls are never rejected
+# with AdminActionProhibitedDuringWeightsWindow, otherwise the random rejections get annoying fast.
+ADMIN_FREEZE_WINDOW = 0
 
 
 def wait_for_subtensor(network: str, retries: int = 30, delay: float = 2.0) -> bt.Subtensor:
@@ -92,8 +111,17 @@ def fund_wallet(subtensor: bt.Subtensor, alice: Wallet, target: Wallet) -> None:
 def create_and_activate_subnet(subtensor: bt.Subtensor, owner: Wallet) -> int:
     """Create a new subnet and activate it. Returns the netuid."""
     if subtensor.subnet_exists(netuid=EXPECTED_NETUID):
-        print(f"Subnet {EXPECTED_NETUID} already exists")
-        return EXPECTED_NETUID
+        match = next((s for s in subtensor.all_subnets() if s.netuid == EXPECTED_NETUID), None)
+        if match and match.owner_coldkey == owner.coldkey.ss58_address:
+            print(f"Subnet {EXPECTED_NETUID} already exists and is owned by us")
+            return EXPECTED_NETUID
+        actual_owner = match.owner_coldkey if match else "?"
+        print(
+            f"Subnet {EXPECTED_NETUID} already exists but is owned by {actual_owner}, "
+            f"not our owner ({owner.coldkey.ss58_address}). "
+            f"Reset localnet (`docker compose down -v && rm -rf localnet/wallets/*/`) or update NETUID in .env."
+        )
+        sys.exit(1)
 
     print("Creating subnet...")
     response = subtensor.register_subnet(
@@ -109,6 +137,14 @@ def create_and_activate_subnet(subtensor: bt.Subtensor, owner: Wallet) -> int:
     subnets = subtensor.all_subnets()
     owned = [s for s in subnets if s.owner_coldkey == owner.coldkey.ss58_address]
     netuid = max(owned, key=lambda s: s.network_registered_at).netuid
+    # The chain auto-assigns the next free netuid; there's no extrinsic to request one.
+    # Bail if it doesn't match .env so pylon/validator/monitor aren't silently misconfigured.
+    if netuid != EXPECTED_NETUID:
+        print(
+            f"Subnet was assigned netuid {netuid}, but .env says NETUID={EXPECTED_NETUID}. "
+            f"Reset localnet (`docker compose down -v && rm -rf localnet/wallets/*/`) or update NETUID."
+        )
+        sys.exit(1)
     print(f"Subnet created with netuid {netuid}")
 
     # Activate the subnet — must wait for start_call delay
@@ -131,6 +167,94 @@ def create_and_activate_subnet(subtensor: bt.Subtensor, owner: Wallet) -> int:
         sys.exit(1)
     print(f"Subnet {netuid} activated")
     return netuid
+
+
+def set_admin_freeze_window(subtensor: bt.Subtensor, sudo: Wallet, window: int) -> None:
+    """Set chain-wide AdminFreezeWindow via Sudo. Requires the root key (Alice on localnet). Idempotent."""
+    current = subtensor.get_admin_freeze_window()
+    if current == window:
+        print(f"  admin freeze window already {window}")
+        return
+    print(f"  Setting admin freeze window {current} -> {window} via sudo...")
+    inner = subtensor.compose_call(
+        call_module="AdminUtils",
+        call_function="sudo_set_admin_freeze_window",
+        call_params={"window": window},
+    )
+    response = subtensor.sign_and_send_extrinsic(
+        call=Sudo(subtensor).sudo(inner),
+        wallet=sudo,
+        wait_for_inclusion=True,
+        wait_for_finalization=True,
+    )
+    if not response.success:
+        print(f"  set_admin_freeze_window failed: {response.message}")
+        sys.exit(1)
+    new_val = subtensor.get_admin_freeze_window()
+    if new_val != window:
+        print(f"  set_admin_freeze_window failed: on-chain value is {new_val}, expected {window}")
+        sys.exit(1)
+    print(f"  admin freeze window set to {window}")
+
+
+def set_subnet_tempo(subtensor: bt.Subtensor, sudo: Wallet, netuid: int, tempo: int) -> None:
+    """Set subnet tempo via Sudo. Requires the root key — not callable by subnet owners. Idempotent."""
+    current = int(subtensor.get_hyperparameter("Tempo", netuid=netuid))
+    if current == tempo:
+        print(f"  tempo already {tempo}")
+        return
+    print(f"  Setting tempo {current} -> {tempo} via sudo...")
+    inner = subtensor.compose_call(
+        call_module="AdminUtils",
+        call_function="sudo_set_tempo",
+        call_params={"netuid": netuid, "tempo": tempo},
+    )
+    response = subtensor.sign_and_send_extrinsic(
+        call=Sudo(subtensor).sudo(inner),
+        wallet=sudo,
+        wait_for_inclusion=True,
+        wait_for_finalization=True,
+    )
+    if not response.success:
+        print(f"  set_tempo failed: {response.message}")
+        sys.exit(1)
+    new_val = int(subtensor.get_hyperparameter("Tempo", netuid=netuid))
+    if new_val != tempo:
+        print(f"  set_tempo failed: on-chain value is {new_val}, expected {tempo}")
+        sys.exit(1)
+    print(f"  tempo set to {tempo}")
+
+
+def set_commit_reveal_enabled(subtensor: bt.Subtensor, owner: Wallet, netuid: int, enabled: bool) -> None:
+    """Toggle commit-reveal weight submission on a subnet. Idempotent.
+
+    The AdminUtils extrinsic accepts subnet owner or root.
+    """
+    current = bool(subtensor.get_hyperparameter("CommitRevealWeightsEnabled", netuid=netuid))
+    if current == enabled:
+        print(f"  commit-reveal already {'enabled' if enabled else 'disabled'}")
+        return
+    print(f"  Setting commit-reveal {current} -> {enabled} as subnet owner...")
+    call = subtensor.compose_call(
+        call_module="AdminUtils",
+        call_function="sudo_set_commit_reveal_weights_enabled",
+        call_params={"netuid": netuid, "enabled": enabled},
+    )
+    response = subtensor.sign_and_send_extrinsic(
+        call=call,
+        wallet=owner,
+        wait_for_inclusion=True,
+        wait_for_finalization=True,
+    )
+    if not response.success:
+        print(f"  set_commit_reveal failed: {response.message}")
+        sys.exit(1)
+    # ExtrinsicResponse.success reports inclusion, not inner dispatch — verify state.
+    new_val = bool(subtensor.get_hyperparameter("CommitRevealWeightsEnabled", netuid=netuid))
+    if new_val != enabled:
+        print(f"  set_commit_reveal failed: on-chain value is {new_val}, expected {enabled}")
+        sys.exit(1)
+    print(f"  commit-reveal {'enabled' if enabled else 'disabled'}")
 
 
 def register_neuron(subtensor: bt.Subtensor, wallet: Wallet, netuid: int) -> None:
@@ -184,6 +308,13 @@ def main() -> None:
 
     print("\n--- Creating subnet ---")
     netuid = create_and_activate_subnet(subtensor, owner)
+
+    print("\n--- Disabling admin freeze window ---")
+    set_admin_freeze_window(subtensor, alice, ADMIN_FREEZE_WINDOW)
+
+    print("\n--- Configuring subnet hyperparameters ---")
+    set_subnet_tempo(subtensor, alice, netuid, SUBNET_TEMPO)
+    set_commit_reveal_enabled(subtensor, owner, netuid, SUBNET_COMMIT_REVEAL_ENABLED)
 
     # Validator: registers and stakes
     print("\n--- Setting up validator ---")
