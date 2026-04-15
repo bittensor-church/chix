@@ -16,13 +16,16 @@ development:
 
 communication:
   deprecated:
-    - axon
     - dendrite
     - synapse
   
   recommended:
     protocol: http_rest
-    discovery: chain_commitments
+    discovery: axon
+    axon_points_at_one_of:
+      - miner
+      - WAF
+      - static_manifest_host
 
   endpoint_commitment:
     method: "subtensor.set_commitment(wallet, netuid, data)"

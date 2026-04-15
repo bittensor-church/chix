@@ -21,7 +21,6 @@ responsibilities:
 
 communication:
   deprecated:
-    - axon
     - dendrite
     - synapse
   
