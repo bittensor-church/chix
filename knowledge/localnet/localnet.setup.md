@@ -38,22 +38,6 @@ Depending on the subnet, there may be more.
 3. start miner fixtures (long-lived)
 4. start validator (long-lived)
 
-## Gotchas
-
-- **tempo:** locked on mainnet/testnet; on localnet, set via root sudo in bootstrap
-- **admin freeze window:** last N blocks of each tempo reject owner admin extrinsics (default 10); with default tempo=10
-  every block is frozen — for any sudo calls to work, set to 0; bootstrap disables this and sets tempo to whatever is
-  set in .env, probably 360 but check
-- **netuid:** netuid 1 reserved and unusable; bootstrap attempts to register netuid 2
-- **owner UID:** subnet owner is automatically uid 0
-- **activation:** subnet inactive until start_call (after get_start_call_delay().value blocks); bootstrap does this
-- **funding:** no faucet — transfer from Alice (//Alice)
-- **axon IP:** 127.0.0.1 silently rejected by subtensor; use 127.0.0.2
-- **pylon cache:** pylon caches neurons; restart pylon to clear after miner, neuron, axon changes
-- **subtensor txn collisions:** concurrent transactions cause nonce collisions; Alice transactions may fail, retries
-  advised
-- **miners get vpermit:** emissions accumulate and eventually cross vpermit threshold; vpermit != neuron is validator
-
 ## localnet/README Sections
 
 Must be customized with subnet-specific information.

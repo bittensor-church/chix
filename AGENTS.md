@@ -7,12 +7,12 @@ template origin as a short note.
 
 # Knowledge base
 
-ALWAYS start by discovering the information we have available in the knowledge base:
+Always start by discovering the information we have available in the knowledge base:
 
 - list the knowledge base files with `find knowledge -type f | sort`
 - directly read all INDEX files
 
-NEVER summarize index files. NEVER delegate reading indices to agents.
+Never summarize index files. Never delegate reading indices to agents or exploration tools.
 
 Read other files as needed.
 
@@ -46,8 +46,8 @@ of the subnet you are about to build.
 
 The Nexus knowledge base ships with the Nexus package — find it in `.venv` within the
 installed Nexus package under `docs/`. Make sure Nexus is installed first (follow this
-project's package management guidelines). Read `docs/nexus.md` in the Nexus package — it is the grounding document for all
-validator development work in this project.
+project's package management guidelines). Read `docs/nexus.md` in the Nexus package — it is the grounding document for
+all validator development work in this project.
 
 Nexus uses Pylon for all subtensor (blockchain) communication. Never use bittensor SDK
 directly.
@@ -56,6 +56,10 @@ directly.
 
 Everything needed to bootstrap, run and test subnet code locally.
 Contains templates, recipes, requirements, operational guidelines, best practices, gotchas and much more.
+When encountering issues during development on localnet, consult this knowledge base first.
+
+Only load this file for tasks that involve writing or modifying code or working on the localnet setup. Skip it during
+design-only work such as subnet mechanism design.
 
 index: knowledge/localnet/INDEX.md
 
@@ -70,9 +74,9 @@ design-only work such as subnet mechanism design.
 # General hints
 
 - use `uv` instead of `python` for managing dependencies, running scripts, entrypoints, ad-hoc code
-  - `uv add ...` / `uv remove ...` / `uv sync` (+ `--all-groups`, `--all-extras`)
-  - `uv run --with foo,bar ...` (with temporary dependencies)
-  - `uv run python -c '...'` / `uv run some/script.py` (code or script)
+    - `uv add ...` / `uv remove ...` / `uv sync` (+ `--all-groups`, `--all-extras`)
+    - `uv run --with foo,bar ...` (with temporary dependencies)
+    - `uv run python -c '...'` / `uv run some/script.py` (code or script)
 
 # Additional rules
 

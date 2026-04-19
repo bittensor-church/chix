@@ -9,7 +9,7 @@ Do not mention specific tasks you do or files you load, it's irrelevant to the u
 
 **requires:** user's subnet idea
 **grounding knowledge:** bittensor
-**do not load:** nexus, pylon
+**do not load:** nexus, pylon, localnet, anything else
 **definition of done:**
 
 - all design rules discovered and met
@@ -20,14 +20,14 @@ Do not mention specific tasks you do or files you load, it's irrelevant to the u
 
 ## Implementing Validator
 
-**requires:** subnet design approved by user, uv sync
+**requires:** subnet design approved by user
 **grounding knowledge:** bittensor, nexus, pylon
 **do not load:** localnet
 **definition of done:**
 
 - project directory ready for development
 - validator.py created
-- all validator error sources wired up for logging
+- all validator error sources wired up to some logger
 - README.md created / rewritten; contains brief subnet description; doesn't reiterate subnet design
 - QA gates pass
 
