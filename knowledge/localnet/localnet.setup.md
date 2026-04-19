@@ -42,7 +42,8 @@ Depending on the subnet, there may be more.
 
 - **tempo:** locked on mainnet/testnet; on localnet, set via root sudo in bootstrap
 - **admin freeze window:** last N blocks of each tempo reject owner admin extrinsics (default 10); with default tempo=10
-  every block is frozen — for any sudo calls to work, set to 0; bootstrap disables this
+  every block is frozen — for any sudo calls to work, set to 0; bootstrap disables this and sets tempo to whatever is
+  set in .env, probably 360 but check
 - **netuid:** netuid 1 reserved and unusable; bootstrap attempts to register netuid 2
 - **owner UID:** subnet owner is automatically uid 0
 - **activation:** subnet inactive until start_call (after get_start_call_delay().value blocks); bootstrap does this
