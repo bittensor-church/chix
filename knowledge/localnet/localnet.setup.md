@@ -13,6 +13,7 @@ Minimal requirements to deem the setup "working":
 - neurons visible on chain, neuron info correct
 - weights set and available on chain; weights reflect miner performance according to subnet rules
 - all miners behaving according to their profiles; miner profiles simulating failures fail in the expected way
+- chain-related goals are verified against subtensor directly, bypassing nexus and pylon
 
 Depending on the subnet, there may be more.
 
