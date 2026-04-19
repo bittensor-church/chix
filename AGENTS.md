@@ -63,6 +63,13 @@ Conventions, tooling, best practices, QA gates, comments, documentation and more
 Only load this file for tasks that involve writing or modifying code. Skip it during
 design-only work such as subnet mechanism design.
 
+# General hints
+
+- use `uv` instead of `python` for managing dependencies, running scripts, entrypoints, ad-hoc code
+  - `uv add ...` / `uv remove ...` / `uv sync` (+ `--all-groups`, `--all-extras`)
+  - `uv run --with foo,bar ...` (with temporary dependencies)
+  - `uv run python -c '...'` / `uv run some/script.py` (code or script)
+
 # Additional rules
 
 - Keep README.md, AGENTS.md, tests, docstrings and code in sync. If one changes, update the others.

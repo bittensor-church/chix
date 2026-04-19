@@ -14,13 +14,7 @@
 - nexus as a framework for validator (no bittensor dependency)
 - pylon for subtensor communication
 
-Read nexus and pylon source from .venv when you need to research them.
-
-NEVER use `pip`, NEVER use `python` directly. `uv` has all the tools you need:
-
-- `uv add ...` to add dependencies
-- `uv run ...` to run code
-- `uv run python ...` to run python
+Read nexus and pylon source from .venv when you need to research them - after having installed them first.
 
 ## QA gates
 
@@ -36,10 +30,12 @@ uv run pytest -q --tb=line -r f
 
 - All imports at top of file. No inline imports
 - Short, concise code. Avoid deep nesting
-- Well-typed. Prefer typed structures over dicts
-- Domain types over bare str/int/float. Use NewType or typed wrappers for semantic values
-- datetime.timedelta for durations, not raw seconds
-- No hasattr/getattr on typed objects
+- Prefer well-typed code:
+  - prefer typed structures (dataclass, BaseModel, NamedTuple) over raw dicts, lists, tuples
+- Avoid primitive types: 
+  - use NewType or typed wrappers for semantic values
+  - use DateTime, Date, Time, timedelta for date/time related values
+- Never use hasattr/getattr on typed objects
 - No dead code - clean up proactively
 - No assertions in production - raise specific exceptions
 - No workarounds - fix, restructure and refactor instead
