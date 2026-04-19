@@ -12,9 +12,13 @@ ALWAYS start by discovering the information we have available in the knowledge b
 - list the knowledge base files with `find knowledge -type f | sort`
 - directly read all INDEX files
 
-NEVER summarize index files. NEVER delegate reading them to other agents.
+NEVER summarize index files. NEVER delegate reading indices to agents.
 
 Read other files as needed.
+
+During your tasks and conversations, eagerly read additional files if they could be relevant.
+
+After compaction, re-read indices directly and read relevant files again.
 
 ## knowledge/bootstrap.md
 
@@ -73,4 +77,3 @@ design-only work such as subnet mechanism design.
 # Additional rules
 
 - Keep README.md, AGENTS.md, tests, docstrings and code in sync. If one changes, update the others.
-
