@@ -1,9 +1,5 @@
 # Coding guidelines
 
-## Project preparation
-
-```uv sync --all-groups```
-
 ## Tech to use
 
 - Python 3.14
@@ -31,10 +27,10 @@ uv run pytest -q --tb=line -r f
 - All imports at top of file. No inline imports
 - Short, concise code. Avoid deep nesting
 - Prefer well-typed code:
-  - prefer typed structures (dataclass, BaseModel, NamedTuple) over raw dicts, lists, tuples
-- Avoid primitive types: 
-  - use NewType or typed wrappers for semantic values
-  - use DateTime, Date, Time, timedelta for date/time related values
+    - prefer typed structures (dataclass, BaseModel, NamedTuple) over raw dicts, lists, tuples
+- Avoid primitive types, especially:
+    - use NewType or typed wrappers for semantic values
+    - use DateTime, Date, Time, timedelta for date/time related values
 - Never use hasattr/getattr on typed objects
 - No dead code - clean up proactively
 - No assertions in production - raise specific exceptions
@@ -46,3 +42,11 @@ uv run pytest -q --tb=line -r f
 - Never restate what code does
 - Do explain non-obvious logic and gotchas
 - Create and update docstrings for public classes, functions, modules
+
+## Ownership
+
+You own the code and are responsible for it, whether you wrote it or not.
+Seemingly unrelated issues are yours to resolve:
+
+- simple things – immediately
+- unknowns and others – after the task at hand

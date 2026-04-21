@@ -12,21 +12,39 @@ Lightweight, isolated development environment modeling a toy subnet for rapid pr
   honest, malicious, malfunctioning, etc.
 - Streamlined bootstrap and teardown of the environment allow testing various scenarios
 
-## How to adapt for localnet
+## Components
 
-While this can be used for any code touching the subnet, we are primarily focused on the validator code.
-External dependencies and services, including subnet-specific supporting services are simplified, replaced or mocked
+- **subtensor:** local chain, runs via docker-compose, fast blocks
+- **pylon:** HTTP proxy to subtensor, runs via docker-compose, used by validator
+- **validator:** long-lived process on host, connects to pylon, registered on chain
+- **miner fixtures:** long-lived processes on host, behave according to their profile
+
+## Resources
+
+- **bootstrap.py** — creates owner and validator wallets, sets tempo, disables commit-reveal, registers subnet,
+  registers, and stakes validator
+- **miners/miner.template.py** — not runnable; copy to miner-{profile}.py and customize per subnet's needs
+- **miners/miner-{profile}.py** — created miner fixtures go here; they self-register and serve, support -n for
+  multi-instance
+- **wallets/** — stores all wallets for localnet; ~/.bittensor must never be used for localnet
+
+## Startup Order
+
+1. `docker compose up` (subtensor + pylon)
+2. `bootstrap.py` (one-time setup)
+3. start miner fixtures (long-lived)
+4. start validator (long-lived)
+
+## Adapting the subnet for localnet
+
+Localnet can be used for any code touching the subnet but we are focused on validator code.
+External dependencies and services, including subnet-specific supporting services are simplified, replaced, or mocked
 out.
 
 ## Files
 
-- **localnet.setup.md** — components, scripts, dependency order, gotchas
-- **localnet.miner-fixtures.md** — creating and working on miner fixtures
-
-## Note
-
-Actual setup steps live in localnet/README.md and the scripts themselves. This KB covers concepts, constraints and
-pitfalls. The README is user-facing, compiled by an agent during bootstrap and adapted to the specific subnet.
+- **localnet.adapting-to-subnet.md** — workflow and definition of done for adapting localnet setup
+- **localnet.miner-fixtures.md** — designing, creating, working on, and using miner fixtures
 
 ## Localnet gotchas
 

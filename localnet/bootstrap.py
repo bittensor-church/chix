@@ -11,7 +11,7 @@ Localnet bootstrap script.
 
 Sets up the local subnet infrastructure:
 - Transfers TAO from Alice (pre-funded devnet account) to owner and validator wallets
-- Creates and activates subnet (netuid 2, since netuid 1 is owned by zero-key)
+- Creates and activates subnet (netuid 2, since netuid 1 is owned by zero-key and is unusable)
 - Registers and stakes validator neuron
 
 register_subnet has no netuid parameter — the chain auto-assigns the next free slot. We

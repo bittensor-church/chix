@@ -27,10 +27,7 @@ communication:
   patterns:
     http_api:
       recommended: true
-      framework_examples:
-        - fastapi
-        - flask
-      discovery: "commit endpoint to chain"
+      discovery: axon_info
     
     orchestrator_socket:
       use_when: "no public endpoint needed"
@@ -76,7 +73,6 @@ endpoint_commitment:
 architecture_patterns:
   http_api_miner:
     structure:
-      - fastapi_app
       - validator_check
       - request_handler
     endpoints:

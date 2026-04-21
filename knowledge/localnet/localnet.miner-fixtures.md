@@ -8,6 +8,14 @@ runnable, not to show how to mine it.
 Miner fixtures must not perform heavy work locally. Delegate to external services where possible (e.g. inference via
 OpenRouter).
 
+Reference bittensor KB to understand what we are simulating - miners, incentives, how they interact with the network and
+validators. Fixtures are allowed to be technically simpler than required, but their behavior on the network must be
+believable.
+
+## What profiles to create
+
+Focus on honest miner behavior as defined by subnet design.
+
 ## Naming
 
 - **MINER_NAME:** short, descriptive of the profile behavior
