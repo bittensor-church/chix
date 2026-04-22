@@ -64,7 +64,7 @@ mechanism:
       4_await_resolution: "Wait for event outcome"
       5_score: "Calculate Brier Score for each agent"
       6_aggregate: "Average over rolling 100-event window"
-      7_set_weights: "Submit weights via Yuma Consensus"
+      7_set_weights: "Submit weights"
 
 # ===========================================================================
 # AGENT INTERFACE
@@ -149,8 +149,7 @@ scoring:
   aggregation:
     window: "Rolling 100 events"
     method: "Average Brier Score over window"
-    purpose: "Smooth noise, reward consistent performance"
-  
+
   weight_conversion:
     mechanism: winner_takes_all
     description: |
@@ -303,7 +302,7 @@ knowledge_connections:
   prediction_market.yaml:
     pattern_match: "Delayed ground truth from event resolution"
     scoring: "Brier Score (proper scoring rule)"
-    window: "Rolling 100 events for smoothing"
+    window: "Rolling 100 events"
   
   chutes.integration.yaml:
     usage: "LLM inference inside agent sandboxes"

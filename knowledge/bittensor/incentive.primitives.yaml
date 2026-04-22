@@ -106,15 +106,20 @@ weight_conversion:
   normalization:
     constraint: "weights sum to 1"
     zero_handling: "uniform distribution"
-  
+
   softmax:
     formula: "exp(score/temp) / sum(exp)"
     temperature_low: "winner-take-most"
     temperature_high: "more equal distribution"
-  
+
   inverse:
     use_when: "lower score is better"
     method: "negative beta in softmax"
+
+  ema_smoothing:
+    status: DISCOURAGED
+    rule: "do NOT design validator-side EMA over scores/weights"
+    if_noisy: "increase sample count or redesign scoring; do not paper over with smoothing"
 
 anti_gaming_measures:
   credibility_tracking:

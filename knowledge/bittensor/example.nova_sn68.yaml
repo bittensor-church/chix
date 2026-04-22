@@ -56,7 +56,7 @@ mechanism:
       2_score: "Run PSICHIC oracle for binding affinity"
       3_rank: "Identify top-scoring molecule per block"
       4_aggregate: "Track performance across round"
-      5_set_weights: "Submit weights via Yuma Consensus"
+      5_set_weights: "Submit weights"
 
 # ===========================================================================
 # PSICHIC ORACLE

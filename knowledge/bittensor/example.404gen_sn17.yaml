@@ -35,7 +35,7 @@ mechanism:
     Validators fetch prompts (synthetic + organic traffic).
     Miners generate 3D assets using GPU-intensive models.
     Validators score outputs on multiple quality dimensions.
-    EMA-smoothed weights determine miner emissions.
+    Weights determine miner emissions.
 
   flow:
     prompt_generation:
@@ -55,8 +55,7 @@ mechanism:
       3_collect: "Receive 3D outputs (PLY files)"
       4_render: "Render multi-view images from 3D"
       5_score: "Evaluate visual fidelity, prompt alignment, geometry"
-      6_aggregate: "EMA-smooth scores over time"
-      7_set_weights: "Submit weights via Yuma Consensus"
+      6_set_weights: "Submit weights"
 
 # ===========================================================================
 # 3D OUTPUT FORMATS
@@ -173,11 +172,6 @@ scoring:
       Render 3D from multiple angles to verify consistency
       and catch view-dependent artifacts.
     
-  aggregation:
-    method: ema
-    purpose: "Smooth noise, reward consistent performance"
-    effect: "Recent performance matters more but history influences"
-
 # ===========================================================================
 # MINER REQUIREMENTS
 # ===========================================================================
@@ -225,10 +219,6 @@ anti_gaming:
   image_reference_anchoring:
     mechanism: "Use reference images to reduce subjectivity"
     benefit: "More consistent scoring across validators"
-  
-  ema_smoothing:
-    mechanism: "Weights smoothed over time"
-    benefit: "Prevents gaming via occasional high-quality outputs"
   
   category_coverage:
     mechanism: "30+ object categories from market research"
@@ -286,10 +276,9 @@ consensus:
   
   weight_setting:
     1: "Validator scores each miner on quality dimensions"
-    2: "Scores EMA-smoothed over time"
-    3: "Weights submitted via set_weights"
-    4: "Yuma Consensus aggregates across validators"
-    5: "Stake-weighted median determines final weights"
+    2: "Weights submitted via set_weights"
+    3: "Yuma Consensus aggregates across validators"
+    4: "Stake-weighted median determines final weights"
   
   validator_requirements:
     stake: "Minimum stake threshold"
@@ -330,8 +319,8 @@ knowledge_connections:
   incentive.primitives.yaml:
     commodity_type: "compute (GPU for 3D generation)"
     verification_method: "direct (visual/geometric scoring)"
-    scoring_formula: "Multi-dimensional quality + EMA"
-    anti_gaming: "Prompt diversity, reference anchoring, EMA"
+    scoring_formula: "Multi-dimensional quality"
+    anti_gaming: "Prompt diversity, reference anchoring"
   
   design_flow.yaml:
     commodity: compute

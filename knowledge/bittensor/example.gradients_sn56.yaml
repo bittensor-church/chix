@@ -57,7 +57,7 @@ mechanism:
       4_evaluate: "Test on SECRET held-out data"
       5_score_miners: "Rank by performance metrics"
       6_advance_tournament: "Progress winners through bracket"
-      7_set_weights: "Submit via Yuma Consensus"
+      7_set_weights: "Submit weights"
 
 # ===========================================================================
 # TASK TYPES

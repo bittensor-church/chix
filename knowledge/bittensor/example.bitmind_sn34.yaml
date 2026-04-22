@@ -69,7 +69,7 @@ mechanism:
       3_build_benchmark: "Mix real data + synthetic submissions"
       4_evaluate_discriminators: "Run detection models on benchmark"
       5_score: "Calculate MCC for discriminators, fool rate for generators"
-      6_set_weights: "EMA-smoothed weights via Yuma Consensus"
+      6_set_weights: "Submit weights"
 
 # ===========================================================================
 # TWO MINER TYPES
@@ -143,12 +143,6 @@ scoring:
     definition: "Fraction of discriminators that misclassify as real"
     quality_gate: "Must pass verification to earn anything"
   
-  weight_smoothing:
-    method: ema
-    alpha: 0.1
-    purpose: "Smooth performance over time, reduce noise"
-    formula: "score_t = α * instant + (1-α) * score_{t-1}"
-  
   epoch:
     length: "360 blocks (~72 minutes)"
     weight_setting: "Validators set weights each epoch"
@@ -212,10 +206,6 @@ anti_gaming:
   model_deduplication:
     mechanism: "Detect copied discriminator architectures"
     benefit: "Rewards novel model development"
-  
-  ema_smoothing:
-    mechanism: "α = 0.1 smoothing on scores"
-    benefit: "Consistent performance matters over lucky rounds"
   
   quality_gates:
     mechanism: "Minimum quality threshold for submissions"
@@ -283,7 +273,7 @@ knowledge_connections:
     commodity_type: "adversarial competition"
     verification_method: "adversarial (miners verify each other)"
     scoring_formula: "MCC for discriminators, fool rate for generators"
-    anti_gaming: "C2PA, deduplication, quality gates, EMA"
+    anti_gaming: "C2PA, deduplication, quality gates"
   
   design_flow.yaml:
     commodity: detection_generation

@@ -49,7 +49,7 @@ mechanism:
       5_compute_rmse: "Calculate prediction error vs ground truth"
       6_apply_difficulty: "Gamma scaling for temporal difficulty"
       7_combine_scores: "80% RMSE + 20% speed"
-      8_set_weights: "Submit weights via Yuma Consensus"
+      8_set_weights: "Submit weights"
     
     miner:
       1_train_model: "Train forecasting model on ERA5 data"
@@ -244,7 +244,7 @@ validator:
     - fetch_era5_data: "Access Copernicus CDS for ground truth"
     - evaluate_responses: "Compare predictions to ERA5"
     - compute_scores: "RMSE + speed + difficulty scaling"
-    - set_weights: "Submit via Yuma Consensus"
+    - set_weights: "Submit weights"
   
   infrastructure:
     data_access: "Copernicus Climate Data Store API"

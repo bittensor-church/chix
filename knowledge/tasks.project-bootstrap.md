@@ -21,8 +21,8 @@
 - project directory ready for development
 - validator.py created
 - all validator error sources wired up to some logger
-- README.md adapted to subnet; template-related info removed; contains brief subnet description; doesn't reiterate
-  subnet design
+- README.md adapted to subnet; template-related info removed; contains brief subnet description; doesn't
+  reiterate subnet design
 - QA gates pass
 
 **after done:** start setting up localnet
@@ -38,9 +38,11 @@
 - no temporary workarounds left
 - repo is clean and has good DX
 - all localnet components work together and perform the subnet's designed goals
-- root README.md updated; added at least: required config, steps to run, pointer to localnet readme for dev setup
+- root README.md updated; added at least: required config, steps to run, pointer to localnet readme for dev
+  setup
 - all claims and instructions in READMEs verified and correct
-- subnet-specific artifacts proving the subnet's work prepared for and presented to the user
+- subnet-specific artifacts, if relevant, proving the subnet's work prepared and presented to the user (but not
+  committed)
 
 ---
 

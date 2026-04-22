@@ -60,7 +60,7 @@ mechanism:
       4_evaluate: "Run agents in MetaWorld simulation"
       5_score: "Measure success rate across episodes"
       6_verify: "Confirm reproducibility of results"
-      7_set_weights: "Submit weights via Yuma Consensus"
+      7_set_weights: "Submit weights"
     
     miner:
       1_view_tasks: "See available competition challenges"
@@ -149,12 +149,6 @@ scoring:
     seeds: "Fixed seeds for reproducibility"
     unseen_variations: "Some held-out goal positions"
   
-  weight_smoothing:
-    method: ema
-    purpose: "Smooth performance over time"
-    formula: "B_t = α * ΔB + (1-α) * B_{t-1}"
-    effect: "Consistent performers rewarded over lucky one-offs"
-  
   verification:
     reproducibility: "Same model + seeds = same results"
     validator_consensus: "Multiple validators cross-check"
@@ -209,10 +203,6 @@ anti_gaming:
     mechanism: "Validators cross-check with fixed seeds"
     benefit: "Cannot fake results"
   
-  ema_smoothing:
-    mechanism: "Weights smoothed over time"
-    benefit: "Consistent performance matters"
-
 # ===========================================================================
 # VALIDATOR REQUIREMENTS
 # ===========================================================================
@@ -272,7 +262,7 @@ knowledge_connections:
   incentive.primitives.yaml:
     commodity_type: "software (RL agents)"
     verification_method: "direct (simulation evaluation)"
-    scoring_formula: "Success rate across tasks + EMA"
+    scoring_formula: "Success rate across tasks"
     anti_gaming: "Multi-task, held-out variations, reproducibility"
   
   design_flow.yaml:

@@ -86,6 +86,10 @@ weight_setting:
   commit_reveal:
     when: "ONLY if weight copying proven"
     period: "50-100 blocks insufficient"
+  ema_smoothing:
+    status: DISCOURAGED
+    rule: "do NOT add EMA over scores/weights by default"
+    if_noisy_scores: "fix the score function or aggregate more samples per epoch instead"
 
 anti_gaming:
   similarity_detection:

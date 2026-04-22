@@ -53,7 +53,6 @@ crps_scoring:
 anti_gaming:
   start_time_enforcement: "prevents peeking"
   crps_rewards_calibration: "honest distributions"
-  rolling_windows: "smooth noise"
   multiple_assets: "prevent overfitting"
 
 timing:
