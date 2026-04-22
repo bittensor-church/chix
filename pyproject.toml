@@ -1,7 +1,7 @@
 [project]
-name = ""
+name = "cat-inpainting-subnet"
 version = "0.1.0"
-description = ""
+description = "Bittensor subnet validator for cat-inpainting image services."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [

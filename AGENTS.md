@@ -1,24 +1,19 @@
 # Context
 
-This project is a template for a Bittensor subnet project. It is meant as a starting point for new projects, containing
-the necessary knowledge and structure to quickly bootstrap a new subnet. As an agent, use this template and modify it as
-needed. Once you start developing it, update this notice to reflect what the actual project is about and keep its
-template origin as a short note.
+This is the cat-inpainting Bittensor subnet: miners receive a user-submitted
+photo and return the same photo with one additional natural-looking cat added.
+The validator (`validator.py`) routes user traffic to miners, judges outputs
+with a VLM via OpenRouter, and sets per-miner weights each epoch.
 
-## Adapting this repository to a new subnet
+See `README.md` for operator docs and `subnet_design.md` for the full design
+(what is measured, scoring formula, trust analysis, deferred items).
 
-This template has to be adapted to an actual project at some point.
-When starting out, refer to the knowledge/tasks.project-bootstrap.md file.
-It contains workflows for:
-
-- Designing the subnet
-- Implementing the validator
-- Setting up localnet
-- Adapting this repository to a new subnet
-- Generally bootstrapping the project
-
-If your task involves any of these, or the task is not clear, but it appears we are not done with the adapting yet,
-adhere strictly to the workflow described in that file and get that done first.
+Originally adapted from the Nexus subnet template. The bootstrap workflows in
+`knowledge/tasks.project-bootstrap.md` describe the original
+"design → implement validator → set up localnet" path; the design and validator
+phases are complete and live in `subnet_design.md` / `validator.py`. Later
+phases (localnet adaptation, etc.) may still be open — consult that file if
+something appears unfinished.
 
 # Knowledge base
 

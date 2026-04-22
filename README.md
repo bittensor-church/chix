@@ -1,55 +1,97 @@
-# Nexus
+# Cat-inpainting subnet
 
-> A proudly Bittensor-gnostic framework for building production-ready subnets.
->
-> [Chi](https://github.com/unconst/Chi)'s brain, Nexus's backbone.
+A Bittensor subnet where miners add a natural-looking cat to user-submitted
+photos. Users drop an image in, get the same image back with one more cat in it.
 
-Subnets should be one-shotted, not hand-built. Nexus turns a subnet concept into a production-grade system — even from a
-single LLM prompt.
+The design — what is measured, how miners are scored, what trust assumptions hold
+— lives in [`subnet_design.md`](./subnet_design.md). The validator is a single
+`validator.py` built on [Nexus](https://github.com/bittensor-church/bittensor-pylon).
 
-## Usage
+Originally based on the Nexus subnet template.
 
-1. Clone this repo into your AI coding agent of choice
-2. "How do I make [your subnet idea]?"
+## Validator
 
-## What you get
+### Configuration
 
-<table>
-<tr>
-<td width="33%" valign="top">
+```sh
+cp .env.example .env
+# fill in VALIDATOR_EXTERNAL_IP and VALIDATOR_OPENROUTER_API_KEY
+```
 
-**Chi**
+Required environment (`.env` or process env):
 
-- Idea → mechanism design
-- Proven incentive patterns
-- Trust & anti-gaming playbook
-- Real subnet case studies
+| Variable | Description |
+|---|---|
+| `NETUID` | Subnet UID (localnet bootstrap assigns netuid 2) |
+| `VALIDATOR_NETUID` | Same value; read by the validator settings |
+| `VALIDATOR_EXTERNAL_IP` | Externally reachable IP of this host. Advertised to miners as the async callback target |
+| `VALIDATOR_OPENROUTER_API_KEY` | OpenRouter API key used by the VLM judge |
+| `VALIDATOR_PYLON_SERVICE_ADDRESS` | Pylon sidecar URL (default: `http://localhost:8000`) |
+| `VALIDATOR_PYLON_OPEN_ACCESS_TOKEN` | Pylon open-access token |
+| `VALIDATOR_PYLON_IDENTITY_NAME` | Pylon identity name for this validator |
+| `VALIDATOR_PYLON_IDENTITY_TOKEN` | Pylon identity token |
 
-</td>
-<td width="34%" valign="top">
+Optional (all have sensible defaults — see `ValidatorSettings` in `validator.py`):
 
-**Nexus v0 (current)**
+- `VALIDATOR_REST_ENTRY_POINT_PORT` (default `8081`) — user-facing ingress
+- `VALIDATOR_MINER_CALLBACK_PORT` (default `9091`) — miner callback listener
+- `VALIDATOR_OPENROUTER_MODEL` (default `google/gemini-3-flash-preview`)
+- `VALIDATOR_NATURALNESS_WEIGHT`, `VALIDATOR_PRESERVATION_WEIGHT`,
+  `VALIDATOR_RELIABILITY_EXPONENT` — scoring coefficients (tunable)
 
-- Production-ready vibe-codable validator
-- Transparently reliable subtensor communication
-- Prebuilt blocks for common subnet patterns
-- Localnet-backed setup for rapid prototyping and keeping your agents on track
+### Running
 
-</td>
-<td width="33%" valign="top">
+```sh
+uv run python validator.py
+```
 
-**Nexus (next steps)**
+The validator exposes `POST /inpaint` on `VALIDATOR_REST_ENTRY_POINT_PORT`.
+Request body: `{"image_b64": "<base64 jpeg or png>"}`. Response body: same shape,
+with a new cat in the image.
 
-- Restart resiliency
-- Miner <-> validator authentication and encryption
-- Autoupdating and dynamic config
-- Observability via metrics, Sentry, Grafana
-- Supply chain: CI/CD, Docker, PyPI
+Both `/inpaint` and the miner callback server bind to `0.0.0.0` by default.
 
-See [the full comparison](https://bittensor-church.github.io/nexus-template/) for more.
+### How it works (short)
 
-</td>
-</tr>
-</table>
+1. The user posts an image to `/inpaint`.
+2. The validator picks one registered miner at random (no fanout, no retries)
+   and forwards the image via Nexus's async HTTP protocol.
+3. The miner returns its inpainted image; the validator returns it to the user
+   as-is (no pre-return validation — reliability scoring is the correction path).
+4. In parallel, every successful mining result is sent to the VLM judge
+   (OpenRouter, Gemini 3 Flash) for `cat_added` / `naturalness` / `preservation`
+   scoring.
+5. At each epoch boundary, per-miner weights are computed from stored task
+   results: `mean_quality * reliability ^ reliability_exponent`.
 
+Full design and trust analysis: [`subnet_design.md`](./subnet_design.md).
 
+## Development
+
+### Prerequisites
+
+- Python 3.14
+- [uv](https://github.com/astral-sh/uv)
+
+### Setup
+
+```sh
+uv sync --all-groups --all-extras
+```
+
+### QA gates
+
+All three must pass. Run in order:
+
+```sh
+uv run ruff check --fix && uv run ruff format
+uv run basedpyright
+uv run pytest -q --tb=line -r f
+```
+
+See [`knowledge/guidelines.coding-and-qa.md`](./knowledge/guidelines.coding-and-qa.md).
+
+## Localnet
+
+See [`localnet/README.md`](./localnet/README.md) for the full end-to-end local
+development flow (local subtensor + pylon + bootstrap + miner fixtures).
