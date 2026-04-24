@@ -20,7 +20,6 @@
 
 - project directory ready for development
 - validator.py created
-- all validator error sources wired up to some logger
 - README.md adapted to subnet; template-related info removed; contains brief subnet description; doesn't
   reiterate subnet design
 - QA gates pass
