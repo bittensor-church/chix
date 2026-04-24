@@ -14,7 +14,7 @@
 # Implementing Validator
 
 **requires:** subnet design approved by user
-**grounding knowledge:** bittensor, subnet design, nexus
+**grounding knowledge:** subnet design, nexus
 **do not load:** localnet
 **definition of done:**
 
@@ -29,7 +29,7 @@
 # Setting Up Localnet
 
 **requires:** validator implemented
-**grounding knowledge:** bittensor/subnet.lifecycle.yaml, localnet
+**grounding knowledge:** localnet
 **definition of done:**
 
 - localnet adapting complete as specified by localnet/localnet.adapting-to-subnet.md
@@ -42,7 +42,3 @@
 - all claims and instructions in READMEs verified and correct
 - subnet-specific artifacts, if relevant, proving the subnet's work prepared and presented to the user (but not
   committed)
-
----
-
-TODO: more to come.
