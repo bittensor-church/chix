@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.14"
 
 [options]
-exclude-newer = "2026-04-12T21:36:05.132739935Z"
+exclude-newer = "2026-04-16T23:57:04.863628778Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -13,6 +13,8 @@ source = { virtual = "." }
 dependencies = [
     { name = "attrs" },
     { name = "bittensor-nexus-lib" },
+    { name = "click" },
+    { name = "python-dotenv" },
 ]
 
 [package.dev-dependencies]
@@ -27,6 +29,8 @@ dev = [
 requires-dist = [
     { name = "attrs", specifier = ">=26.1.0" },
     { name = "bittensor-nexus-lib", git = "https://github.com/bittensor-church/nexus-poc.git?subdirectory=nexus-template&branch=kk-template-wip" },
+    { name = "click", specifier = ">=8.3.2" },
+    { name = "python-dotenv", specifier = ">=1.2.2" },
 ]
 
 [package.metadata.requires-dev]
