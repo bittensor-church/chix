@@ -38,8 +38,8 @@
 - no temporary workarounds left
 - repo is clean and has good DX
 - all localnet components work together and perform the subnet's designed goals
-- root README.md updated; added at least: required config, steps to run, pointer to localnet readme for dev
-  setup
+- root README.md updated; added at least: localnet section with steps to run, configure, pointer to localnet
+  readme for dev setup
 - all claims and instructions in READMEs verified and correct
 - subnet-specific artifacts, if relevant, proving the subnet's work prepared and presented to the user (but not
   committed)

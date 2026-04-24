@@ -30,7 +30,7 @@ Lightweight, isolated development environment modeling a toy subnet for rapid pr
 
 ## Startup Order
 
-1. `docker compose up` (subtensor + pylon)
+1. `cd localnet && docker compose up` (subtensor + pylon)
 2. `bootstrap.py` (one-time setup)
 3. start miner fixtures (long-lived)
 4. start validator (long-lived)
@@ -51,7 +51,7 @@ out.
 - **tempo:** locked on mainnet/testnet; on localnet, set via root sudo in bootstrap script
 - **admin freeze window:** last N blocks of each tempo reject owner admin extrinsics (default 10); with default tempo=10
   every block is frozen — for any sudo calls to work, set to 0; bootstrap disables this and sets tempo to whatever is
-  set in .env, probably 360 but check
+  set in localnet/.env, probably 360 but check
 - **netuid:** netuid 1 reserved and unusable; bootstrap attempts to register netuid 2
 - **owner UID:** subnet owner is automatically uid 0
 - **activation:** subnet inactive until start_call (after get_start_call_delay().value blocks); bootstrap does this

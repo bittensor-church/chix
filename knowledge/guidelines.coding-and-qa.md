@@ -22,6 +22,8 @@ uv run basedpyright
 uv run pytest -q --tb=line -r f
 ```
 
+Never loosen any basedpyright rules – globally or locally.
+
 ## Code style
 
 - All imports at top of file. No inline imports
@@ -45,8 +47,8 @@ uv run pytest -q --tb=line -r f
 
 ## Ownership
 
-You own the code and are responsible for it, whether you wrote it or not.
-Seemingly unrelated issues are yours to resolve:
+You own the code and are responsible for it, whether you wrote it or not. Seemingly unrelated issues are yours
+to resolve:
 
 - simple things – immediately
 - unknowns and others – after the task at hand

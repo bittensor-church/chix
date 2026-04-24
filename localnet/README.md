@@ -10,10 +10,10 @@ Run a complete local subnet for development and testing.
 ## Infrastructure
 
 ```sh
-docker compose up -d
+cd localnet && docker compose up -d
 ```
 
-Starts a local subtensor blockchain (port 9944) and a pylon proxy (port 8000).
+Starts a local subtensor blockchain (port 9944) and a pylon proxy (port 8000). Compose reads `localnet/.env`, so run from that directory.
 
 ## Bootstrap
 
@@ -26,11 +26,11 @@ Creates owner and validator wallets, funds them from Alice (pre-funded devnet ac
 ## Running the validator
 
 ```sh
-cp .env.example .env
-uv run python validator.py
+cp localnet/.env.example localnet/.env
+uv run python validator.py --env-file localnet/.env
 ```
 
-The `.env.example` is pre-configured to connect to the local pylon.
+The `localnet/.env.example` is pre-configured to connect to the local pylon.
 
 ## Miner fixtures
 
@@ -55,11 +55,11 @@ cp localnet/miners/miner.template.py localnet/miners/miner-yourname.py
 Full reset — clears chain state. Restart any running miners and validators afterwards so they re-register against the fresh chain.
 
 ```sh
-docker compose down && docker compose up -d
+cd localnet && docker compose down && docker compose up -d
 ```
 
 Restart chain only:
 
 ```sh
-docker compose restart subtensor
+cd localnet && docker compose restart subtensor
 ```

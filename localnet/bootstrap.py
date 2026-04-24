@@ -15,10 +15,10 @@ Sets up the local subnet infrastructure:
 - Registers and stakes validator neuron
 
 register_subnet has no netuid parameter — the chain auto-assigns the next free slot. We
-assume it matches NETUID from .env and abort if not, so pylon/validator/monitor don't
-end up pointed at a different subnet than the one we configured.
+assume it matches NETUID from localnet/.env and abort if not, so pylon/validator/monitor
+don't end up pointed at a different subnet than the one we configured.
 
-Prerequisites: subtensor must be running (docker compose up).
+Prerequisites: subtensor must be running (cd localnet && docker compose up).
 
 Usage: uv run localnet/bootstrap.py
 """
@@ -36,7 +36,7 @@ from bittensor.utils.balance import Balance
 from bittensor_wallet import Keypair, Wallet
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).parent / ".env")
 
 WALLETS_DIR = Path(__file__).parent / "wallets"
 SUBTENSOR_NETWORK = "ws://127.0.0.1:9944"
@@ -119,7 +119,8 @@ def create_and_activate_subnet(subtensor: bt.Subtensor, owner: Wallet) -> int:
         print(
             f"Subnet {EXPECTED_NETUID} already exists but is owned by {actual_owner}, "
             f"not our owner ({owner.coldkey.ss58_address}). "
-            f"Reset localnet (`docker compose down -v && rm -rf localnet/wallets/*/`) or update NETUID in .env."
+            f"Reset localnet (`cd localnet && docker compose down -v && rm -rf wallets/*/`) "
+            f"or update NETUID in localnet/.env."
         )
         sys.exit(1)
 
@@ -138,11 +139,11 @@ def create_and_activate_subnet(subtensor: bt.Subtensor, owner: Wallet) -> int:
     owned = [s for s in subnets if s.owner_coldkey == owner.coldkey.ss58_address]
     netuid = max(owned, key=lambda s: s.network_registered_at).netuid
     # The chain auto-assigns the next free netuid; there's no extrinsic to request one.
-    # Bail if it doesn't match .env so pylon/validator/monitor aren't silently misconfigured.
+    # Bail on mismatch so pylon/validator/monitor aren't silently misconfigured.
     if netuid != EXPECTED_NETUID:
         print(
-            f"Subnet was assigned netuid {netuid}, but .env says NETUID={EXPECTED_NETUID}. "
-            f"Reset localnet (`docker compose down -v && rm -rf localnet/wallets/*/`) or update NETUID."
+            f"Subnet was assigned netuid {netuid}, but localnet/.env says NETUID={EXPECTED_NETUID}. "
+            f"Reset localnet (`cd localnet && docker compose down -v && rm -rf wallets/*/`) or update NETUID."
         )
         sys.exit(1)
     print(f"Subnet created with netuid {netuid}")
