@@ -26,7 +26,7 @@ services:
       PYLON_ID_VALIDATOR_NETUID: "${NETUID:?}"
       PYLON_ID_VALIDATOR_TOKEN: "${VALIDATOR_PYLON_IDENTITY_TOKEN:?}"
     volumes:
-      - ./localnet/wallets:/wallets:ro
+      - ./wallets:/wallets:ro
     depends_on:
       subtensor:
         condition: service_healthy
