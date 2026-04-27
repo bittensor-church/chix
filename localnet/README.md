@@ -49,7 +49,6 @@ cp localnet/miners/miner.template.py localnet/miners/miner-yourname.py
 # edit MINER_NAME, TARGET_PATH, handle_request(), anything else necessary for the subnet
 ```
 
-
 ## Resetting
 
 Full reset — clears chain state. Restart any running miners and validators afterwards so they re-register against the fresh chain.
