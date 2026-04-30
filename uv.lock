@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.14"
 
 [options]
-exclude-newer = "2026-04-20T23:38:50.547699022Z"
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -12,7 +12,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "attrs" },
-    { name = "bittensor-nexus-lib" },
+    { name = "bittensor-nexus-library" },
     { name = "click" },
     { name = "python-dotenv" },
 ]
@@ -28,7 +28,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "attrs", specifier = ">=26.1.0" },
-    { name = "bittensor-nexus-lib", git = "https://github.com/bittensor-church/nexus-poc.git?subdirectory=nexus-template&branch=kk-template-wip" },
+    { name = "bittensor-nexus-library", git = "https://github.com/bittensor-church/bittensor-nexus-library.git?branch=kb" },
     { name = "click", specifier = ">=8.3.2" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
 ]
@@ -96,15 +96,16 @@ wheels = [
 ]
 
 [[package]]
-name = "bittensor-nexus-lib"
-version = "0.1.0"
-source = { git = "https://github.com/bittensor-church/nexus-poc.git?subdirectory=nexus-template&branch=kk-template-wip#3cd9c5584e21f36bd45628f3f1e62b626308d1f4" }
+name = "bittensor-nexus-library"
+version = "0.0.1.dev162+g87ab425fb"
+source = { git = "https://github.com/bittensor-church/bittensor-nexus-library.git?branch=kb#87ab425fb6aa66054d7cf873abab822bf5742774" }
 dependencies = [
     { name = "bittensor-pylon-client" },
     { name = "boto3" },
     { name = "deepdiff" },
     { name = "httpx" },
     { name = "litestar", extra = ["prometheus", "standard"] },
+    { name = "polyfactory" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "sniffio" },
