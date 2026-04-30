@@ -34,20 +34,18 @@ design_philosophy:
       - miners_compete_through_innovation
       - simplicity_breeds_auditability
     
-    single_file_pattern:
-      file: "validator.py"
-      contains:
-        - configuration
-        - miner_interface_spec
-        - discovery_method
-        - scoring_logic
-        - weight_setting
-        - main_loop
-      
-      excludes:
-        - miner_implementation
-        - reference_solutions
-        - shared_synapse_definitions
+    required_components:
+      - configuration
+      - miner_interface_spec
+      - discovery_method
+      - scoring_logic
+      - weight_setting
+      - main_loop
+
+    excludes:
+      - miner_implementation
+      - reference_solutions
+      - shared_synapse_definitions
 
 core_loop:
   realized_by: nexus_framework

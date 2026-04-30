@@ -19,7 +19,7 @@
 **definition of done:**
 
 - project directory ready for development
-- validator.py created
+- validator implemented
 - README.md adapted to subnet; template-related info removed; contains brief subnet description; doesn't
   reiterate subnet design
 - QA gates pass

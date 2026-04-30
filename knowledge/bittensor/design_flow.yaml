@@ -75,8 +75,7 @@ decision_tree:
         when: "miners compete on code quality"
 
   step_6_implementation:
-    file: "validator.py"
-    contains:
+    required_components:
       - configuration
       - miner_interface_spec
       - scoring_logic
@@ -88,7 +87,6 @@ decision_tree:
 
 validation_checklist:
   architecture:
-    - single_file_validator_py: required
     - no_miner_code: required
     - open_source_preference: required
   

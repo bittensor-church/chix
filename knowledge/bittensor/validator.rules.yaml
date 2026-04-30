@@ -98,15 +98,13 @@ anti_gaming:
     alternative: "design around copying"
 
 implementation:
-  single_file:
-    rule: "All logic in validator.py"
-    contains:
-      - configuration
-      - miner_interface_spec
-      - scoring_logic
-      - weight_setting
-      - main_loop
-  
+  required_components:
+    - configuration
+    - miner_interface_spec
+    - scoring_logic
+    - weight_setting
+    - main_loop
+
   docstring:
     required: true
     contains:

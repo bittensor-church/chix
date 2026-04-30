@@ -3,9 +3,8 @@
 
 architecture:
   validator_only_development:
-    rule: "ONLY write validator.py. NEVER write production miner code."
+    rule: "ONLY write validator code. NEVER write production miner code."
     rationale: "Validators define the game; miners infer how to play"
-    enforcement: "single-file pattern for production code"
     violation_indicator: "miner code in production paths (root, src/)"
     exception:
       localnet_miner_fixtures:

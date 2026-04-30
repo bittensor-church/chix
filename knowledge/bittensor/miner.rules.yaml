@@ -4,7 +4,7 @@
 development:
   no_provided_code:
     rule: "Subnet owners NEVER write miner code"
-    implication: "Miners read validator.py to understand interface"
+    implication: "Miners read validator code to understand interface"
     competition: "through innovation, not copying reference"
 
   open_source:
